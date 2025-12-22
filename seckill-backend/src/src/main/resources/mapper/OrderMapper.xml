@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.OrderMapper">
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order` (order_no, user_id, product_id, activity_id, seckill_price, quantity, total_amount, status, create_time, update_time)
+        VALUES (#{orderNo}, #{userId}, #{productId}, #{activityId}, #{seckillPrice}, #{quantity}, #{totalAmount}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.seckill_backend.model.Order">
+        UPDATE `order`
+        SET order_no = #{orderNo},
+            user_id = #{userId},
+            product_id = #{productId},
+            activity_id = #{activityId},
+            seckill_price = #{seckillPrice},
+            quantity = #{quantity},
+            total_amount = #{totalAmount},
+            status = #{status},
+            payment_time = #{paymentTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM `order` WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="long" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" parameterType="string" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="selectByUserId" parameterType="long" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectByStatus" parameterType="int" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` WHERE status = #{status}
+    </select>
+
+    <select id="selectByActivityId" parameterType="long" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` WHERE activity_id = #{activityId}
+    </select>
+
+    <select id="selectExpiredOrders" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` 
+        WHERE status = 0 
+        AND DATE_ADD(create_time, INTERVAL 15 MINUTE) &lt; UTC_TIMESTAMP()
+    </select>
+
+    <select id="selectUnpaidOrders" parameterType="int" resultType="com.example.seckill_backend.model.Order">
+        SELECT * FROM `order` 
+        WHERE status = 0 
+        AND DATE_ADD(create_time, INTERVAL #{minutes} MINUTE) &lt; UTC_TIMESTAMP()
+    </select>
+
+    <update id="updateStatus">
+        UPDATE `order`
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ActivityProductMapper">
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.ActivityProduct" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity_product (activity_id, product_id, seckill_price, seckill_stock, limit_per_user)
+        VALUES (#{activityId}, #{productId}, #{seckillPrice}, #{seckillStock}, #{limitPerUser})
+    </insert>
+
+    <update id="update" parameterType="com.example.seckill_backend.model.ActivityProduct">
+        UPDATE activity_product
+        SET activity_id = #{activityId},
+            product_id = #{productId},
+            seckill_price = #{seckillPrice},
+            seckill_stock = #{seckillStock},
+            limit_per_user = #{limitPerUser}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM activity_product WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="long" resultType="com.example.seckill_backend.model.ActivityProduct">
+        SELECT * FROM activity_product WHERE id = #{id}
+    </select>
+
+    <select id="selectByActivityId" parameterType="long" resultType="com.example.seckill_backend.model.ActivityProduct">
+        SELECT * FROM activity_product WHERE activity_id = #{activityId}
+    </select>
+
+    <select id="selectByProductId" parameterType="long" resultType="com.example.seckill_backend.model.ActivityProduct">
+        SELECT * FROM activity_product WHERE product_id = #{productId}
+    </select>
+
+    <select id="selectByActivityAndProduct" resultType="com.example.seckill_backend.model.ActivityProduct">
+        SELECT * FROM activity_product WHERE activity_id = #{activityId} AND product_id = #{productId}
+    </select>
+
+    <update id="updateSeckillStock">
+        UPDATE activity_product
+        SET seckill_stock = seckill_stock - #{decrement}
+        WHERE id = #{id} AND seckill_stock &gt;= #{decrement}
+    </update>
+
+    <update id="revertSeckillStock">
+        UPDATE activity_product
+        SET seckill_stock = seckill_stock + #{increment}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
