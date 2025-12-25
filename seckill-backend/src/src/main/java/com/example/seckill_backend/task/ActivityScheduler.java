@@ -5,6 +5,7 @@ import com.example.seckill_backend.mapper.OrderMapper;
 import com.example.seckill_backend.model.ActivityProduct;
 import com.example.seckill_backend.model.Order;
 import com.example.seckill_backend.service.ActivityService;
+import com.example.seckill_backend.service.SeckillRedisService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class ActivityScheduler {
     private final ActivityService activityService;
     private final OrderMapper orderMapper;
     private final ActivityProductMapper activityProductMapper;
+    private final SeckillRedisService seckillRedisService;
     
     /**
      * 每分钟执行一次，更新活动状态
@@ -50,6 +52,7 @@ public class ActivityScheduler {
                 ActivityProduct activityProduct = activityProductMapper.selectByActivityAndProduct(order.getActivityId(), order.getProductId());
                 if (activityProduct != null) {
                     activityProductMapper.revertSeckillStock(activityProduct.getId(), order.getQuantity());
+                    seckillRedisService.revertStock(activityProduct.getId(), order.getQuantity());
                 }
                 
                 // 更新订单状态为已取消

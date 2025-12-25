@@ -12,11 +12,14 @@ import com.example.seckill_backend.service.OrderService;
 import com.example.seckill_backend.service.RequestFrequencyService;
 import com.example.seckill_backend.service.ProductService;
 import com.example.seckill_backend.service.ActivityService;
+import com.example.seckill_backend.service.SeckillRedisService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -26,6 +29,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
     
     private final OrderMapper orderMapper;
@@ -35,10 +39,12 @@ public class OrderServiceImpl implements OrderService {
     private final CaptchaService captchaService;
     private final RequestFrequencyService requestFrequencyService;
     private final ActivityService activityService;
+    private final SeckillRedisService seckillRedisService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Order createSeckillOrder(Long userId, Long activityId, Long productId, int quantity, String captchaId, String captchaValue) {
+
         // 0. 用户认证检查：确保用户存在
         User user = userMapper.getUserById(userId);
         if (user == null) {
@@ -67,8 +73,22 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("活动商品不存在");
         }
 
+        if (!seckillRedisService.tryDeductStock(activityProduct.getId(), activityProduct.getSeckillStock(), quantity)) {
+            throw new RuntimeException("商品库存不足");
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
+                    seckillRedisService.revertStock(activityProduct.getId(), quantity);
+                }
+            }
+        });
+
         // 3. 扣减活动商品库存
         if (activityProductMapper.updateSeckillStock(activityProduct.getId(), quantity) <= 0) {
+            seckillRedisService.revertStock(activityProduct.getId(), quantity);
             throw new RuntimeException("商品库存不足");
         }
 
@@ -123,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
         ActivityProduct activityProduct = activityProductMapper.selectByActivityAndProduct(order.getActivityId(), order.getProductId());
         if (activityProduct != null) {
             activityProductMapper.revertSeckillStock(activityProduct.getId(), order.getQuantity());
+            seckillRedisService.revertStock(activityProduct.getId(), order.getQuantity());
         }
 
         return true;
@@ -157,6 +178,7 @@ public class OrderServiceImpl implements OrderService {
             ActivityProduct activityProduct = activityProductMapper.selectByActivityAndProduct(order.getActivityId(), order.getProductId());
             if (activityProduct != null) {
                 activityProductMapper.revertSeckillStock(activityProduct.getId(), order.getQuantity());
+                seckillRedisService.revertStock(activityProduct.getId(), order.getQuantity());
             }
         }
     }
