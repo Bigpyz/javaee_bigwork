@@ -80,11 +80,11 @@ const routes = [
 // 管理端路由
   {
     path: "/admin",
-    redirect: "/admin/activity-management"
+    redirect: { name: 'AdminLogin' } // 直接重定向到登录页面
   },
   {
     path: "/admin/",
-    redirect: "/admin/activity-management"
+    redirect: { name: 'AdminLogin' } // 直接重定向到登录页面
   },
   {
     path: "/admin/login",

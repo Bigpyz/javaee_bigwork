@@ -1,6 +1,11 @@
 <template>
   <div class="activity-management">
-    <h2>秒杀活动管理</h2>
+    <div class="header">
+      <h2>秒杀活动管理</h2>
+      <div class="header-actions">
+        <button @click="logout" class="btn btn-danger">退出登录</button>
+      </div>
+    </div>
     <div class="action-bar">
       <button @click="showCreateForm = true" class="btn btn-primary">创建新活动</button>
     </div>
@@ -188,6 +193,12 @@ export default {
     }
   },
   methods: {
+    logout() {
+      // 清除管理员登录信息
+      localStorage.removeItem('adminInfo')
+      // 跳转到管理员登录页面
+      this.$router.push('/admin/login')
+    },
     loadActivities() {
       getAllActivities().then(response => {
         this.activities = response.data
@@ -594,13 +605,26 @@ export default {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.activity-management h2 {
-  color: var(--text);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 25px;
-  font-size: 1.8rem;
-  font-weight: 600;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 68, 0, 0.22);
+}
+
+.activity-management h2 {
+  color: var(--text);
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .hint-text {
