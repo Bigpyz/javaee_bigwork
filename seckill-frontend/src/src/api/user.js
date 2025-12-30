@@ -15,6 +15,25 @@ export function login(username, password) {
   });
 }
 
+export function me() {
+  return http.get(`/api/users/me`);
+}
+
+export function logout() {
+  return http.post(`/api/users/logout`);
+}
+
+export function adminLogin(username, password) {
+  return http.post(`/api/admin/login`, {
+    username,
+    password,
+  });
+}
+
+export function adminLogout() {
+  return http.post(`/api/admin/logout`);
+}
+
 export function getUserProfile(userId) {
   return http.get(`/api/users/profile/${userId}`);
 }
