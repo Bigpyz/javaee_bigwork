@@ -7,6 +7,10 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * 商品创建请求DTO
+ * 用于接收前端请求参数
+ */
 @Data
 public class ProductCreateRequest {
     @NotBlank
