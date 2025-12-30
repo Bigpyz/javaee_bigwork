@@ -19,4 +19,6 @@ public interface OrderMapper {
     List<Order> selectExpiredOrders();
     List<Order> selectUnpaidOrders(@Param("minutes") int minutes);
     int updateStatus(@Param("id") Long id, @Param("status") int status);
+    int updateStatusIfMatch(@Param("id") Long id, @Param("fromStatus") int fromStatus, @Param("toStatus") int toStatus);
+    int markPaid(@Param("id") Long id);
 }

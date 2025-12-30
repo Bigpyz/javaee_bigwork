@@ -169,9 +169,11 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
 
-        // 更新订单状态为已取消
-        order.setStatus(4);
-        orderMapper.update(order);
+        // 幂等更新：仅当仍为“待支付”时才允许取消
+        int updated = orderMapper.updateStatusIfMatch(orderId, 0, 4);
+        if (updated <= 0) {
+            return false;
+        }
 
         // 恢复库存（调用商品服务）
         productService.revertActivityProductStock(order.getActivityId(), order.getProductId(), order.getQuantity());
@@ -184,11 +186,11 @@ public class OrderServiceImpl implements OrderService {
     public void processExpiredOrders() {
         List<Order> expiredOrders = orderMapper.selectExpiredOrders();
         for (Order order : expiredOrders) {
-            order.setStatus(5);
-            orderMapper.update(order);
-
-            // 恢复库存（调用商品服务）
-            productService.revertActivityProductStock(order.getActivityId(), order.getProductId(), order.getQuantity());
+            int updated = orderMapper.updateStatusIfMatch(order.getId(), 0, 5);
+            if (updated > 0) {
+                // 恢复库存（调用商品服务）
+                productService.revertActivityProductStock(order.getActivityId(), order.getProductId(), order.getQuantity());
+            }
         }
     }
 
@@ -202,12 +204,8 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
 
-        // 更新订单状态为已支付
-        order.setStatus(1);
-        order.setPaymentTime(new Date());
-        orderMapper.update(order);
-
-        return true;
+        // 幂等更新：仅当仍为“待支付”时才允许支付
+        return orderMapper.markPaid(orderId) > 0;
     }
 
     @Override
@@ -254,10 +252,7 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
 
-        order.setStatus(1);
-        order.setPaymentTime(new Date());
-        orderMapper.update(order);
-        return true;
+        return orderMapper.markPaid(order.getId()) > 0;
     }
 
     private String hmacSha256Hex(String secret, String payload) {

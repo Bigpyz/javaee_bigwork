@@ -49,13 +49,13 @@
     <select id="selectExpiredOrders" resultType="com.example.seckill_backend.model.Order">
         SELECT * FROM `order` 
         WHERE status = 0 
-        AND DATE_ADD(create_time, INTERVAL 15 MINUTE) &lt; UTC_TIMESTAMP()
+        AND DATE_ADD(create_time, INTERVAL 15 MINUTE) &lt; NOW()
     </select>
 
     <select id="selectUnpaidOrders" parameterType="int" resultType="com.example.seckill_backend.model.Order">
         SELECT * FROM `order` 
         WHERE status = 0 
-        AND DATE_ADD(create_time, INTERVAL #{minutes} MINUTE) &lt; UTC_TIMESTAMP()
+        AND DATE_ADD(create_time, INTERVAL #{minutes} MINUTE) &lt; NOW()
     </select>
 
     <update id="updateStatus">
@@ -63,6 +63,23 @@
         SET status = #{status},
             update_time = NOW()
         WHERE id = #{id}
+    </update>
+
+    <update id="updateStatusIfMatch">
+        UPDATE `order`
+        SET status = #{toStatus},
+            update_time = NOW()
+        WHERE id = #{id}
+          AND status = #{fromStatus}
+    </update>
+
+    <update id="markPaid">
+        UPDATE `order`
+        SET status = 1,
+            payment_time = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+          AND status = 0
     </update>
 
 </mapper>

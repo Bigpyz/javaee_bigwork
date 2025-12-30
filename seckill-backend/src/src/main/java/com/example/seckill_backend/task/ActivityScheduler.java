@@ -45,15 +45,13 @@ public class ActivityScheduler {
         
         for (Order order : unpaidOrders) {
             try {
-                // 回滚库存（调用商品服务）
-                productService.revertActivityProductStock(order.getActivityId(), order.getProductId(), order.getQuantity());
+                int updated = orderMapper.updateStatusIfMatch(order.getId(), 0, 5);
+                if (updated > 0) {
+                    // 回滚库存（调用商品服务）
+                    productService.revertActivityProductStock(order.getActivityId(), order.getProductId(), order.getQuantity());
+                    logger.info("订单 {} 已取消并回滚库存", order.getId());
+                }
                 
-                // 更新订单状态为已取消
-                order.setStatus(5); // 5: 超时未支付
-                order.setUpdateTime(new Date());
-                orderMapper.update(order);
-                
-                logger.info("订单 {} 已取消并回滚库存", order.getId());
             } catch (Exception e) {
                 logger.error("处理订单 {} 库存回滚失败: {}", order.getId(), e.getMessage());
                 // 单个订单处理失败不影响其他订单

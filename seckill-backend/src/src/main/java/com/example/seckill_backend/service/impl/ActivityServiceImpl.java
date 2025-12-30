@@ -143,7 +143,12 @@ public class ActivityServiceImpl implements ActivityService, ActivityStatsServic
         if (activity == null) {
             return false;
         }
-        return activityMapper.updateStatus(id, 2) > 0;
+        boolean updated = activityMapper.updateStatus(id, 2) > 0;
+        if (updated) {
+            // 同步扣减Product表库存
+            syncProductStockForActivity(id);
+        }
+        return updated;
     }
 
     @Override
@@ -245,8 +250,10 @@ public class ActivityServiceImpl implements ActivityService, ActivityStatsServic
             
             try {
                 Product product = productService.getProductById(productId);
-                product.setTotalStock(product.getTotalStock() - soldQuantity);
-                product.setSeckillStock(product.getSeckillStock() - soldQuantity);
+                int newTotalStock = Math.max(0, product.getTotalStock() - soldQuantity);
+                int newSeckillStock = Math.max(0, product.getSeckillStock() - soldQuantity);
+                product.setTotalStock(newTotalStock);
+                product.setSeckillStock(newSeckillStock);
                 productService.updateProduct(product);
                 logger.info("活动[{}]结束，商品[{}]库存已同步，售出数量: {}", activityId, productId, soldQuantity);
             } catch (Exception e) {
