@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         if (id == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "id 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "id不能为空");
         }
         Product existing = productMapper.selectById(id);
         if (existing == null) {
@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(Long id) {
         if (id == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "id 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "id不能为空");
         }
         Product product = productMapper.selectById(id);
         if (product == null) {
@@ -80,10 +80,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deductSeckillStock(Long productId, int quantity) {
         if (productId == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "productId 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "productId不能为空");
         }
         if (quantity <= 0) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "quantity 必须大于 0");
+            throw new BizException(ErrorCode.BAD_REQUEST, "quantity必须大于 0");
         }
         Product product = productMapper.selectById(productId);
         if (product == null || product.getSeckillStock() < quantity) {
@@ -96,10 +96,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(rollbackFor = Exception.class)
     public boolean revertSeckillStock(Long productId, int quantity) {
         if (productId == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "productId 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "productId不能为空");
         }
         if (quantity <= 0) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "quantity 必须大于 0");
+            throw new BizException(ErrorCode.BAD_REQUEST, "quantity必须大于 0");
         }
         return productMapper.revertSeckillStock(productId, quantity) > 0;
     }
@@ -107,10 +107,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public boolean checkSeckillStock(Long productId, int quantity) {
         if (productId == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "productId 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "productId不能为空");
         }
         if (quantity <= 0) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "quantity 必须大于 0");
+            throw new BizException(ErrorCode.BAD_REQUEST, "quantity必须大于 0");
         }
         Product product = productMapper.selectById(productId);
         return product != null && product.getSeckillStock() >= quantity;
@@ -118,13 +118,13 @@ public class ProductServiceImpl implements ProductService {
 
     private void validateProductForCreateOrUpdate(Product product, boolean requireId) {
         if (product == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "product 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "product不能为空");
         }
         if (requireId && product.getId() == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "id 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "id不能为空");
         }
         if (product.getName() == null || product.getName().isBlank()) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "name 不能为空");
+            throw new BizException(ErrorCode.BAD_REQUEST, "name不能为空");
         }
         if (product.getOriginalPrice() == null) {
             throw new BizException(ErrorCode.BAD_REQUEST, "originalPrice 不能为空");
@@ -133,13 +133,13 @@ public class ProductServiceImpl implements ProductService {
             throw new BizException(ErrorCode.BAD_REQUEST, "seckillPrice 不能为空");
         }
         if (product.getTotalStock() == null || product.getTotalStock() < 0) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "totalStock 不合法");
+            throw new BizException(ErrorCode.BAD_REQUEST, "totalStock不合法");
         }
         if (product.getSeckillStock() == null || product.getSeckillStock() < 0) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "seckillStock 不合法");
+            throw new BizException(ErrorCode.BAD_REQUEST, "seckillStock不合法");
         }
         if (product.getSeckillStock() > product.getTotalStock()) {
-            throw new BizException(ErrorCode.BAD_REQUEST, "seckillStock 不能大于 totalStock");
+            throw new BizException(ErrorCode.BAD_REQUEST, "seckillStock不能大于totalStock");
         }
     }
 }
