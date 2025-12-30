@@ -41,6 +41,44 @@ public class OrderController {
     /**
      * id
      *
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<Boolean> cancelOrder(@PathVariable Long id) {
+        return ApiResponse.success(orderService.cancelOrder(id));
+    }
+
+    /**
+     * id
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/pay")
+    public ApiResponse<Boolean> payOrder(@PathVariable Long id) {
+        return ApiResponse.success(orderService.payOrder(id));
+    }
+
+    /**
+     *
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/payment-callback")
+    public ApiResponse<Boolean> handlePaymentCallback(@Valid @RequestBody PaymentCallbackRequest request) {
+        return ApiResponse.success(orderService.handlePaymentCallback(
+                request.getOrderNo(),
+                request.getAmount(),
+                request.getTimestamp(),
+                request.getNonce(),
+                request.getSignature()));
+    }
+
+    /**
+     * id
+     *
      * @param id 
      * @return 
      */
@@ -82,27 +120,7 @@ public class OrderController {
         return ApiResponse.success(orderService.getOrdersByStatus(status));
     }
 
-    /**
-     * id
-     *
-     * @param id 
-     * @return 
-     */
-    @PostMapping("/{id}/cancel")
-    public ApiResponse<Boolean> cancelOrder(@PathVariable Long id) {
-        return ApiResponse.success(orderService.cancelOrder(id));
-    }
 
-    /**
-     * id
-     *
-     * @param id 
-     * @return 
-     */
-    @PostMapping("/{id}/pay")
-    public ApiResponse<Boolean> payOrder(@PathVariable Long id) {
-        return ApiResponse.success(orderService.payOrder(id));
-    }
 
     /**
      * 
@@ -115,19 +133,4 @@ public class OrderController {
         return ApiResponse.success(null);
     }
 
-    /**
-     * 
-     *
-     * @param request 
-     * @return 
-     */
-    @PostMapping("/payment-callback")
-    public ApiResponse<Boolean> handlePaymentCallback(@Valid @RequestBody PaymentCallbackRequest request) {
-        return ApiResponse.success(orderService.handlePaymentCallback(
-                request.getOrderNo(),
-                request.getAmount(),
-                request.getTimestamp(),
-                request.getNonce(),
-                request.getSignature()));
-    }
 }
