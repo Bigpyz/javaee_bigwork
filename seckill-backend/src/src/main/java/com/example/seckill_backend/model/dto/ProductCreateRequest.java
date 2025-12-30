@@ -36,5 +36,9 @@ public class ProductCreateRequest {
     @Min(0)
     private Integer seckillStock;
 
+    /**
+     * 商品状态
+     * 可选字段，1=启用（默认）、0=禁用；若前端不传，后端会设置默认值
+     */
     private Integer status;
 }
