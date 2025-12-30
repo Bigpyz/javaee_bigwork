@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 商品服务实现类
+ * 实现ProductService接口，处理商品的增删改查、秒杀库存扣减/回滚、库存校验等核心业务逻辑
+ */
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
