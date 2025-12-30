@@ -102,25 +102,21 @@ public class ProductServiceImpl implements ProductService {
         if (quantity <= 0) {
             throw new BizException(ErrorCode.BAD_REQUEST, "quantity必须大于0");
         }
-
         // 1. 查询活动商品
         ActivityProduct activityProduct = activityProductMapper.selectByActivityAndProduct(activityId, productId);
         if (activityProduct == null) {
             throw new BizException(ErrorCode.NOT_FOUND, "活动商品不存在");
         }
-
         // 2. 先尝试扣减Redis库存（预扣减，提高并发性能）
         if (!seckillRedisService.tryDeductStock(activityProduct.getId(), activityProduct.getSeckillStock(), quantity)) {
             return false;
         }
-
         // 3. 扣减数据库库存
         if (activityProductMapper.updateSeckillStock(activityProduct.getId(), quantity) <= 0) {
             // 数据库扣减失败，回滚Redis库存
             seckillRedisService.revertStock(activityProduct.getId(), quantity);
             return false;
         }
-
         return true;
     }
 
@@ -133,18 +129,15 @@ public class ProductServiceImpl implements ProductService {
         if (quantity <= 0) {
             throw new BizException(ErrorCode.BAD_REQUEST, "quantity必须大于0");
         }
-
         // 1. 查询活动商品
         ActivityProduct activityProduct = activityProductMapper.selectByActivityAndProduct(activityId, productId);
         if (activityProduct == null) {
             throw new BizException(ErrorCode.NOT_FOUND, "活动商品不存在");
         }
-
         // 2. 回滚数据库库存
         if (activityProductMapper.revertSeckillStock(activityProduct.getId(), quantity) <= 0) {
             return false;
         }
-
         // 3. 回滚Redis库存
         seckillRedisService.revertStock(activityProduct.getId(), quantity);
 

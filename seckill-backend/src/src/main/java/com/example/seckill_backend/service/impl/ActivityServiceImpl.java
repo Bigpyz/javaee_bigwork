@@ -208,6 +208,9 @@ public class ActivityServiceImpl implements ActivityService, ActivityStatsServic
                 activityMapper.update(activity);
                 logger.info("活动【ID：{}，名称：{}】状态更新：{} → 2（已结束），原因：结束时间{}早于当前时间{}",
                         activityId, activityName, currentStatus, endTimeStr, nowStr);
+                
+                // 同步扣减Product表库存
+                syncProductStockForActivity(activityId);
             } else {
                 // 无状态更新的情况，打印debug日志
                 logger.debug("活动【ID：{}，名称：{}】无需更新状态，当前状态已匹配时间条件", activityId, activityName);
@@ -217,6 +220,39 @@ public class ActivityServiceImpl implements ActivityService, ActivityStatsServic
         logger.info("活动状态更新任务执行完成");
         // 移除ThreadLocal中的格式化器，避免内存泄漏
         DATE_FORMATTER.remove();
+    }
+
+    /**
+     * 活动结束后，根据已售数量同步扣减Product表库存
+     */
+    private void syncProductStockForActivity(Long activityId) {
+        Logger logger = LoggerFactory.getLogger(ActivityServiceImpl.class);
+        
+        // 获取该活动的订单，统计每个商品的售出数量
+        List<com.example.seckill_backend.model.Order> orders = orderMapper.selectByActivityId(activityId);
+        java.util.Map<Long, Integer> soldMap = new java.util.HashMap<>();
+        for (com.example.seckill_backend.model.Order order : orders) {
+            // 只统计已支付(1)、已发货(2)、已完成(3)的订单
+            if (order.getStatus() != null && order.getStatus() >= 1 && order.getStatus() <= 3) {
+                soldMap.merge(order.getProductId(), order.getQuantity(), Integer::sum);
+            }
+        }
+        
+        // 更新Product表库存
+        for (java.util.Map.Entry<Long, Integer> entry : soldMap.entrySet()) {
+            Long productId = entry.getKey();
+            int soldQuantity = entry.getValue();
+            
+            try {
+                Product product = productService.getProductById(productId);
+                product.setTotalStock(product.getTotalStock() - soldQuantity);
+                product.setSeckillStock(product.getSeckillStock() - soldQuantity);
+                productService.updateProduct(product);
+                logger.info("活动[{}]结束，商品[{}]库存已同步，售出数量: {}", activityId, productId, soldQuantity);
+            } catch (Exception e) {
+                logger.error("活动[{}]结束，商品[{}]库存同步失败: {}", activityId, productId, e.getMessage());
+            }
+        }
     }
 
     @Override
