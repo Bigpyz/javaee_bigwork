@@ -453,7 +453,7 @@
                     }
                 };
 
-                // 初始化
+                //
                 checkRememberedUser();
 
                 return {
