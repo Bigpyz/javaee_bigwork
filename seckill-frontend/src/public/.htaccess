@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /dist
+  RewriteRule ^index\.html$ - [L]
+
+  # 处理/admin路径的多种情况
+  RewriteRule ^admin$ admin/ [R=301,L]
+  RewriteRule ^admin/$ /dist/index.html [L]
+  RewriteRule ^admin/.*$ /dist/index.html [L]
+
+  # 处理其他路由的重定向
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /dist/index.html [L]
+</IfModule>

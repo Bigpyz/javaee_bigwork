@@ -76,7 +76,16 @@ const routes = [
     component: ActivityDetail,
   },
   
-  // 管理端路由
+  
+// 管理端路由
+  {
+    path: "/admin",
+    redirect: "/admin/activity-management"
+  },
+  {
+    path: "/admin/",
+    redirect: "/admin/activity-management"
+  },
   {
     path: "/admin/login",
     name: "AdminLogin",
@@ -92,6 +101,11 @@ const routes = [
     name: "AdminActivityDashboard",
     component: ActivityDashboard,
   },
+  // 404 页面重定向
+  {
+    path: "*",
+    redirect: "/"
+  }
 ]
 
 const router = new VueRouter({
@@ -114,6 +128,18 @@ router.beforeEach((to, from, next) => {
   // 检查管理员是否已登录
   const isAdminLoggedIn = localStorage.getItem('adminInfo');
   
+  // 检查是否是管理员路径
+  const isAdminPath = to.path.startsWith('/admin') && to.path !== '/admin/login';
+  
+  // 检查是否是直接访问 /admin 或 /admin/ 路径
+  const isDirectAdminRoot = to.path === '/admin' || to.path === '/admin/';
+  
+  // 如果直接访问 admin 根路径，并且未登录，直接重定向到登录页
+  if (isDirectAdminRoot && !isAdminLoggedIn) {
+    next({ name: 'AdminLogin' });
+    return;
+  }
+  
   if (requiresUserAuth.includes(to.name) && !isLoggedIn) {
     me().then(res => {
       if (res && res.data) {
@@ -126,7 +152,7 @@ router.beforeEach((to, from, next) => {
       next({ name: 'Login' });
     });
     return;
-  } else if (requiresAdminAuth.includes(to.name) && !isAdminLoggedIn) {
+  } else if ((requiresAdminAuth.includes(to.name) || isAdminPath) && !isAdminLoggedIn) {
     // 管理员未登录且尝试访问需要管理员权限的页面，重定向到管理员登录页
     next({ name: 'AdminLogin' });
   } else {
