@@ -10,11 +10,11 @@ export function generateCaptcha(userId, productId) {
   });
 }
 
-export function verifyCaptcha(captchaId, captchaValue) {
-  return http.post(`/api/captcha/verify`, null, {
-    params: {
-      captchaId,
-      captchaValue
-    }
+export function verifyCaptcha(captchaId, captchaValue, userId, productId) {
+  return http.post(`/api/captcha/verify`, {
+    captchaId,
+    captchaValue,
+    userId,
+    productId
   });
 }

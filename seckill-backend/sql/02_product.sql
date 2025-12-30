@@ -2,6 +2,8 @@ CREATE TABLE product (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(100) NOT NULL,
   description TEXT,
+  image_url VARCHAR(255),
+  activity_id BIGINT,
   original_price DECIMAL(10, 2) NOT NULL,
   seckill_price DECIMAL(10, 2) NOT NULL,
   total_stock INT NOT NULL DEFAULT 0,

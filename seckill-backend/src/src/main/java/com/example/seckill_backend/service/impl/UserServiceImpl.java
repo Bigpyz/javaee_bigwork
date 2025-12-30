@@ -1,5 +1,7 @@
 package com.example.seckill_backend.service.impl;
 
+import com.example.seckill_backend.common.BizException;
+import com.example.seckill_backend.common.ErrorCode;
 import com.example.seckill_backend.mapper.UserMapper;
 import com.example.seckill_backend.model.User;
 import com.example.seckill_backend.service.UserService;
@@ -19,7 +21,7 @@ public class UserServiceImpl implements UserService {
         // 检查用户名是否已存在
         User existingUser = userMapper.getUserByUsername(username);
         if (existingUser != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new BizException(ErrorCode.BAD_REQUEST, "用户名已存在");
         }
 
         // 对密码进行加密（MD5 方式）
@@ -37,13 +39,13 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String password) {
         User user = userMapper.getUserByUsername(username);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BizException(ErrorCode.NOT_FOUND, "用户不存在");
         }
 
         // 对输入的密码进行加密后比对
         String encryptedPassword = DigestUtils.md5DigestAsHex(password.getBytes());
         if (!encryptedPassword.equals(user.getPassword())) {
-            throw new RuntimeException("密码错误");
+            throw new BizException(ErrorCode.BAD_REQUEST, "密码错误");
         }
 
         // 记录登录时间

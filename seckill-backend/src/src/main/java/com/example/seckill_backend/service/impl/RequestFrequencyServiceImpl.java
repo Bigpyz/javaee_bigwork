@@ -1,5 +1,7 @@
 package com.example.seckill_backend.service.impl;
 
+import com.example.seckill_backend.common.BizException;
+import com.example.seckill_backend.common.ErrorCode;
 import com.example.seckill_backend.service.RequestFrequencyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,7 +42,7 @@ public class RequestFrequencyServiceImpl implements RequestFrequencyService {
         String key = generateKey(userId, productId);
         Boolean ok = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", Duration.ofMillis(TIME_WINDOW_MS));
         if (!Boolean.TRUE.equals(ok)) {
-            throw new RuntimeException("请求过于频繁，请稍后重试");
+            throw new BizException(ErrorCode.TOO_FREQUENT);
         }
         log.info("记录用户请求：userId={}, productId={}", userId, productId);
     }

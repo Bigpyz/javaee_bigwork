@@ -88,21 +88,26 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f5f5f5;
+  padding: 24px;
+  background: radial-gradient(900px 600px at 20% 0%, rgba(255, 68, 0, 0.14), transparent 55%),
+    radial-gradient(900px 600px at 90% 10%, rgba(99, 102, 241, 0.14), transparent 55%),
+    var(--bg);
 }
 
 .register-card {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 26px;
+  border-radius: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.10);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.12);
+  backdrop-filter: blur(10px);
   width: 100%;
   max-width: 400px;
 }
 
 .register-card h2 {
   margin-top: 0;
-  color: #ff4400;
+  color: var(--text);
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -114,31 +119,43 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .form-group input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 10px;
   box-sizing: border-box;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: rgba(255, 68, 0, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 68, 0, 0.12);
 }
 
 .register-btn {
   width: 100%;
   padding: 0.75rem;
-  background-color: #ff4400;
+  background-color: var(--primary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 1rem;
   margin-top: 1rem;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(255, 68, 0, 0.18);
+  transition: transform .15s ease, background-color .15s ease;
 }
 
 .register-btn:hover:not(:disabled) {
-  background-color: #ff5511;
+  background-color: var(--primary-700);
+  transform: translateY(-1px);
 }
 
 .register-btn:disabled {
@@ -147,14 +164,14 @@ export default {
 }
 
 .error {
-  color: #ff4400;
+  color: #e74c3c;
   margin: 0.5rem 0;
 }
 
 .login-link {
   text-align: center;
   margin-top: 1rem;
-  color: #666;
+  color: var(--muted);
 }
 
 .login-link a {

@@ -1,66 +1,133 @@
 package com.example.seckill_backend.controller;
 
+import com.example.seckill_backend.common.ApiResponse;
+import com.example.seckill_backend.model.dto.PaymentCallbackRequest;
+import com.example.seckill_backend.model.dto.SeckillOrderCreateRequest;
 import com.example.seckill_backend.model.Order;
 import com.example.seckill_backend.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 
+ */
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
 
+    /**
+     * 
+     *
+     * @param request 
+     * @return 
+     */
     @PostMapping("/seckill")
-    public Order createSeckillOrder(@RequestParam Long userId,
-                                    @RequestParam Long activityId,
-                                    @RequestParam Long productId,
-                                    @RequestParam(defaultValue = "1") int quantity,
-                                    @RequestParam String captchaId,
-                                    @RequestParam String captchaValue) {
-        // 用户认证检查，确保用户存在
-        return orderService.createSeckillOrder(userId, activityId, productId, quantity, captchaId, captchaValue);
+    public ApiResponse<Order> createSeckillOrder(@Valid @RequestBody SeckillOrderCreateRequest request) {
+        int quantity = request.getQuantity() == null ? 1 : request.getQuantity();
+        return ApiResponse.success(orderService.createSeckillOrder(
+                request.getUserId(),
+                request.getActivityId(),
+                request.getProductId(),
+                quantity,
+                request.getCaptchaId(),
+                request.getCaptchaValue()));
     }
 
+    /**
+     * id
+     *
+     * @param id 
+     * @return 
+     */
     @GetMapping("/{id}")
-    public Order getOrderById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
+    public ApiResponse<Order> getOrderById(@PathVariable Long id) {
+        return ApiResponse.success(orderService.getOrderById(id));
     }
 
+    /**
+     * orderNo
+     *
+     * @param orderNo 
+     * @return 
+     */
     @GetMapping("/order-no/{orderNo}")
-    public Order getOrderByOrderNo(@PathVariable String orderNo) {
-        return orderService.getOrderByOrderNo(orderNo);
+    public ApiResponse<Order> getOrderByOrderNo(@PathVariable String orderNo) {
+        return ApiResponse.success(orderService.getOrderByOrderNo(orderNo));
     }
 
+    /**
+     * userId
+     *
+     * @param userId 
+     * @return 
+     */
     @GetMapping("/user/{userId}")
-    public List<Order> getOrdersByUserId(@PathVariable Long userId) {
-        return orderService.getOrdersByUserId(userId);
+    public ApiResponse<List<Order>> getOrdersByUserId(@PathVariable Long userId) {
+        return ApiResponse.success(orderService.getOrdersByUserId(userId));
     }
 
+    /**
+     * status
+     *
+     * @param status 
+     * @return 
+     */
     @GetMapping("/status/{status}")
-    public List<Order> getOrdersByStatus(@PathVariable int status) {
-        return orderService.getOrdersByStatus(status);
+    public ApiResponse<List<Order>> getOrdersByStatus(@PathVariable int status) {
+        return ApiResponse.success(orderService.getOrdersByStatus(status));
     }
 
+    /**
+     * id
+     *
+     * @param id 
+     * @return 
+     */
     @PostMapping("/{id}/cancel")
-    public boolean cancelOrder(@PathVariable Long id) {
-        return orderService.cancelOrder(id);
+    public ApiResponse<Boolean> cancelOrder(@PathVariable Long id) {
+        return ApiResponse.success(orderService.cancelOrder(id));
     }
 
+    /**
+     * id
+     *
+     * @param id 
+     * @return 
+     */
     @PostMapping("/{id}/pay")
-    public boolean payOrder(@PathVariable Long id) {
-        return orderService.payOrder(id);
+    public ApiResponse<Boolean> payOrder(@PathVariable Long id) {
+        return ApiResponse.success(orderService.payOrder(id));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @PostMapping("/process-expired")
-    public void processExpiredOrders() {
+    public ApiResponse<Void> processExpiredOrders() {
         orderService.processExpiredOrders();
+        return ApiResponse.success(null);
     }
 
+    /**
+     * 
+     *
+     * @param request 
+     * @return 
+     */
     @PostMapping("/payment-callback")
-    public boolean handlePaymentCallback(@RequestParam String orderNo) {
-        return orderService.handlePaymentCallback(orderNo);
+    public ApiResponse<Boolean> handlePaymentCallback(@Valid @RequestBody PaymentCallbackRequest request) {
+        return ApiResponse.success(orderService.handlePaymentCallback(
+                request.getOrderNo(),
+                request.getAmount(),
+                request.getTimestamp(),
+                request.getNonce(),
+                request.getSignature()));
     }
 }

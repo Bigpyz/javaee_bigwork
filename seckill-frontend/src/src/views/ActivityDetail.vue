@@ -35,10 +35,10 @@
             暂无关联商品
           </div>
           <div v-else class="products-grid">
-            <div v-for="product in activity.activityProducts" :key="product.id" class="product-card">
+            <div v-for="product in activity.activityProducts" :key="product.activityProductId || product.productId || product.id" class="product-card">
               <div class="product-image">
               <img :src="product.imageDisplayUrl || 'https://via.placeholder.com/200x200?text=暂无图片'" :alt="product.name" @error="handleImageError">
-              <div class="product-id">ID: {{ product.id }}</div>
+              <div class="product-id">商品ID: {{ product.productId || product.id }}</div>
             </div>
               <div class="product-info">
                 <div class="product-header">
@@ -65,9 +65,11 @@
         
         <div class="action-buttons">
           <button @click="goBack" class="btn btn-secondary">返回</button>
-          <button v-if="activity.status === 0" @click="editActivity" class="btn btn-warning">编辑活动</button>
-          <button v-if="activity.status === 1" @click="closeActivity" class="btn btn-danger">关闭活动</button>
-          <button @click="viewDashboard" class="btn btn-success">查看数据</button>
+          <template v-if="isAdminRoute">
+            <button v-if="activity.status === 0" @click="editActivity" class="btn btn-warning">编辑活动</button>
+            <button v-if="activity.status === 1" @click="closeActivity" class="btn btn-danger">关闭活动</button>
+            <button @click="viewDashboard" class="btn btn-success">查看数据</button>
+          </template>
         </div>
       </div>
       
@@ -117,11 +119,15 @@
 </template>
 
 <script>
-import { getActivityById, closeActivity, updateActivity, getProductsByActivityId, getProductImage, getProductById } from '../api/activity'
-import axios from 'axios'
+import { getActivityById, closeActivity, updateActivity, getProductsByActivityId, getProductById } from '../api/activity'
 import apiConfig from '../config/api'
 
 export default {
+  computed: {
+    isAdminRoute() {
+      return this.$route && typeof this.$route.path === 'string' && this.$route.path.startsWith('/admin')
+    }
+  },
   data() {
     return {
       activity: null,
@@ -186,21 +192,28 @@ export default {
           const productsWithDetails = await Promise.all(
             productsResponse.data.map(async product => {
               try {
+                const productId = product.productId != null ? product.productId : product.id
                 // 获取完整的商品信息
-                const productDetailResponse = await getProductById(product.id)
+                const productDetailResponse = await getProductById(productId)
                 const fullProduct = productDetailResponse.data
                 
                 // 合并原有信息和详细信息
-                const mergedProduct = { ...product, ...fullProduct }
+                const mergedProduct = {
+                  ...product,
+                  activityProductId: product.id,
+                  ...fullProduct,
+                  productId: productId
+                }
                 
                 // 获取商品图片
                 mergedProduct.imageDisplayUrl = await this.getProductImage(mergedProduct)
-                console.log(`商品${product.id}的完整信息:`, mergedProduct)
-                console.log(`商品${product.id}的图片URL:`, mergedProduct.imageDisplayUrl)
+                console.log(`商品${productId}的完整信息:`, mergedProduct)
+                console.log(`商品${productId}的图片URL:`, mergedProduct.imageDisplayUrl)
                 
                 return mergedProduct
               } catch (error) {
-                console.error(`获取商品${product.id}详细信息失败:`, error)
+                const fallbackProductId = product.productId != null ? product.productId : product.id
+                console.error(`获取商品${fallbackProductId}详细信息失败:`, error)
                 product.imageDisplayUrl = 'https://via.placeholder.com/200x200?text=商品信息加载失败'
                 return product
               }
@@ -288,7 +301,7 @@ export default {
       }
     },
     viewDashboard() {
-      this.$router.push(`/activity-dashboard/${this.activity.id}`)
+      this.$router.push(`/admin/activity-dashboard/${this.activity.id}`)
     },
     validateForm() {
       let isValid = true
@@ -390,39 +403,6 @@ export default {
       const total = product.seckillStock || 1
       return total > 0 ? Math.min((sold / total) * 100, 100) : 0
     },
-    testApi() {
-      const id = this.$route.params.id
-      console.log('测试API，活动ID:', id)
-      
-      // 测试活动详情API
-      getActivityById(id)
-        .then(response => {
-          console.log('活动详情API测试成功:', response.data)
-          console.log('活动详情的activityProducts字段:', response.data.activityProducts)
-        })
-        .catch(error => {
-          console.error('活动详情API测试失败:', error)
-        })
-      
-      // 测试商品信息API
-      getProductsByActivityId(id)
-        .then(response => {
-          console.log('商品信息API测试成功:', response.data)
-          if (response.data && response.data.length > 0) {
-            console.log('第一个商品的完整数据结构:', response.data[0])
-            console.log('第一个商品的所有字段:', Object.keys(response.data[0]))
-            console.log('第一个商品的图片相关字段:', {
-              imageUrl: response.data[0].imageUrl,
-              image: response.data[0].image,
-              picture: response.data[0].picture,
-              pic: response.data[0].pic
-            })
-          }
-        })
-        .catch(error => {
-          console.error('商品信息API测试失败:', error)
-        })
-    },
     async getProductImage(product) {
   try {
     // 如果商品有图片URL，直接使用
@@ -438,18 +418,6 @@ export default {
       }
       // 其他情况，尝试作为相对路径处理
       return apiConfig.IMAGE_BASE_URL + '/' + imageUrl
-    }
-    
-    // 如果没有图片URL，尝试通过商品ID获取图片
-    if (product.id) {
-      try {
-        const response = await getProductImage(product.id)
-        if (response.data && response.data.imageUrl) {
-          return response.data.imageUrl
-        }
-      } catch (error) {
-        console.error(`获取商品${product.id}的图片失败:`, error)
-      }
     }
     
     // 如果都没有，返回占位图片
@@ -471,34 +439,40 @@ export default {
 .activity-detail {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 16px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .activity-detail h2 {
-  color: #333;
+  color: var(--text);
   margin-bottom: 25px;
   font-size: 1.8rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid #ff4400;
+  border-bottom: 1px solid rgba(255, 68, 0, 0.22);
 }
 
 .loading, .error {
   text-align: center;
   padding: 50px;
   font-size: 18px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
-  color: #dc3545;
+  color: #e74c3c;
 }
 
 .activity-info {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  padding: 25px;
+  background-color: rgba(255, 255, 255, 0.90);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  border: 1px solid var(--border);
 }
 
 .activity-header {
@@ -510,35 +484,38 @@ export default {
 
 .activity-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text);
   font-size: 1.6rem;
 }
 
 .status-pending {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: rgba(241, 196, 15, 0.12);
+  color: #b58900;
+  border: 1px solid rgba(241, 196, 15, 0.30);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 800;
 }
 
 .status-active {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.25);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 800;
 }
 
 .status-ended {
-  background-color: #6c757d;
-  color: white;
+  background-color: rgba(231, 76, 60, 0.10);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.25);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 800;
 }
 
 .activity-timeline {
@@ -546,7 +523,7 @@ export default {
   gap: 40px;
   margin-bottom: 30px;
   padding: 20px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .timeline-item {
@@ -557,47 +534,48 @@ export default {
 
 .timeline-label {
   font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .timeline-value {
   font-size: 16px;
-  color: #333;
+  color: var(--text);
   font-weight: 600;
 }
 
 .activity-rule {
   margin-bottom: 30px;
   padding: 20px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .activity-rule h4 {
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text);
   font-size: 1.2rem;
 }
 
 .activity-rule p {
-  color: #6c757d;
+  color: var(--muted);
   line-height: 1.6;
   margin: 0;
 }
 
 .activity-products h4 {
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text);
   font-size: 1.2rem;
 }
 
 .no-products {
   text-align: center;
   padding: 30px;
-  color: #6c757d;
+  color: var(--muted);
   font-size: 16px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: rgba(17, 24, 39, 0.02);
+  border-radius: var(--radius);
+  border: 1px solid rgba(17, 24, 39, 0.08);
   margin-bottom: 20px;
 }
 
@@ -609,16 +587,18 @@ export default {
 }
 
 .product-card {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: #fff;
+  border-radius: var(--radius);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: rgba(255, 68, 0, 0.20);
 }
 
 .product-image {
@@ -633,28 +613,17 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  transition: transform 0.3s ease;
+  border-radius: 10px;
+  transition: transform .15s ease;
 }
 
 .product-image:hover img {
   transform: scale(1.05);
 }
 
-.product-id {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
 .product-info h5 {
   margin-bottom: 5px;
-  color: #333;
+  color: var(--text);
   font-size: 1.1rem;
 }
 
@@ -666,13 +635,13 @@ export default {
 }
 
 .product-category {
-  color: #6c757d;
+  color: var(--muted);
   font-size: 12px;
   margin-bottom: 8px;
 }
 
 .product-description {
-  color: #6c757d;
+  color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 15px;
@@ -692,20 +661,21 @@ export default {
 }
 
 .original-price {
-  color: #6c757d;
+  color: var(--muted);
   font-size: 14px;
   text-decoration: line-through;
 }
 
 .seckill-price {
-  color: #dc3545;
+  color: var(--primary);
   font-size: 20px;
   font-weight: 700;
 }
 
 .discount {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.25);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -717,7 +687,7 @@ export default {
   flex-direction: column;
   gap: 10px;
   font-size: 14px;
-  color: #6c757d;
+  color: var(--muted);
 }
 
 .stock-info {
@@ -732,12 +702,12 @@ export default {
 .progress-label {
   font-size: 12px;
   margin-bottom: 4px;
-  color: #6c757d;
+  color: var(--muted);
 }
 
 .progress-bar {
   height: 8px;
-  background-color: #e9ecef;
+  background-color: var(--border);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 4px;
@@ -745,43 +715,43 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background-color: #28a745;
+  background-color: #2ecc71;
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 12px;
   text-align: right;
-  color: #6c757d;
+  color: var(--muted);
 }
 
 .product-status-draft {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--border);
+  color: var(--muted);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .product-status-active {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .product-status-inactive {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: rgba(241, 196, 15, 0.12);
+  color: #b58900;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .product-status-deleted {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(231, 76, 60, 0.10);
+  color: #e74c3c;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -792,64 +762,95 @@ export default {
   gap: 15px;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: rgba(17, 24, 39, 0.06);
+  color: var(--text);
+  border-color: rgba(17, 24, 39, 0.14);
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
+  background-color: rgba(17, 24, 39, 0.10);
 }
 
 .btn-warning {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: rgba(241, 196, 15, 0.12);
+  color: #b58900;
+  border-color: rgba(241, 196, 15, 0.30);
 }
 
 .btn-warning:hover {
-  background-color: #e0a800;
+  background-color: rgba(241, 196, 15, 0.18);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(231, 76, 60, 0.12);
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.25);
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
+  background-color: rgba(231, 76, 60, 0.18);
 }
 
 .btn-success {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border-color: rgba(46, 204, 113, 0.25);
 }
 
 .btn-success:hover {
-  background-color: #218838;
+  background-color: rgba(46, 204, 113, 0.18);
 }
 
 .btn-info {
-  background-color: #17a2b8;
-  color: white;
+  background-color: rgba(52, 152, 219, 0.12);
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.25);
 }
 
 .btn-info:hover {
-  background-color: #138496;
+  background-color: rgba(52, 152, 219, 0.18);
+}
+
+@media (max-width: 768px) {
+  .activity-detail {
+    padding: 16px;
+  }
+
+  .activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .activity-timeline {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .action-buttons {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 </style>

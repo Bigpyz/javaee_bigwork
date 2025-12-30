@@ -145,8 +145,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { getAllActivities, updateActivity, createActivityWithProducts } from '../api/activity'
+import { getAllActivities, updateActivity, createActivityWithProducts, closeActivity } from '../api/activity'
 import { uploadImage } from '../api/file'
 
 export default {
@@ -229,14 +228,14 @@ export default {
     },
     closeActivity(id) {
       if (confirm('确定要关闭此活动吗？')) {
-        axios.post(`http://localhost:28080/api/activities/${id}/end`)
+        closeActivity(id)
           .then(() => {
             alert('活动已关闭')
             this.loadActivities()
           })
           .catch(error => {
             console.error('关闭活动失败:', error)
-            alert('关闭活动失败')
+            alert('关闭活动失败：' + (error.response?.data?.message || error.message || '未知错误'))
           })
       }
     },
@@ -515,90 +514,100 @@ export default {
 .activity-management {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 16px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .activity-management h2 {
-  color: #333;
+  color: var(--text);
   margin-bottom: 25px;
   font-size: 1.8rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid #ff4400;
+  border-bottom: 1px solid rgba(255, 68, 0, 0.22);
 }
 
 .action-bar {
   margin-bottom: 25px;
 }
 
+ .activity-list {
+  overflow-x: auto;
+ }
+
 /* Button Styles */
 .btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
 .btn-primary {
-  background: linear-gradient(90deg, #ff4400, #ff6633);
-  color: white;
-  box-shadow: 0 2px 8px rgba(255, 68, 0, 0.3);
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(255, 68, 0, 0.14);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 68, 0, 0.4);
+  background: var(--primary-700);
+  border-color: var(--primary-700);
+  box-shadow: 0 14px 28px rgba(255, 68, 0, 0.18);
 }
 
 .btn-info {
-  background-color: #17a2b8;
-  color: white;
+  background-color: rgba(52, 152, 219, 0.12);
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.25);
 }
 
 .btn-info:hover {
-  background-color: #138496;
-  transform: translateY(-1px);
+  background-color: rgba(52, 152, 219, 0.18);
 }
 
 .btn-warning {
-  background-color: #ffc107;
-  color: #212529;
+  background-color: rgba(241, 196, 15, 0.12);
+  color: #b58900;
+  border-color: rgba(241, 196, 15, 0.30);
 }
 
 .btn-warning:hover {
-  background-color: #e0a800;
-  transform: translateY(-1px);
+  background-color: rgba(241, 196, 15, 0.18);
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(231, 76, 60, 0.12);
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.25);
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
-  transform: translateY(-1px);
+  background-color: rgba(231, 76, 60, 0.18);
 }
 
 .btn-success {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border-color: rgba(46, 204, 113, 0.25);
 }
 
 .btn-success:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
+  background-color: rgba(46, 204, 113, 0.18);
 }
 
 .btn-sm {
-  padding: 6px 12px;
+  padding: 6px 10px;
   font-size: 12px;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -607,27 +616,28 @@ export default {
 /* Table Styles */
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
-  background-color: white;
-  border-radius: 12px;
+  background-color: #fff;
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
 }
 
 .table th,
 .table td {
-  padding: 15px;
+  padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .table th {
-  background: linear-gradient(90deg, #f8f9fa, #e9ecef);
-  color: #495057;
-  font-weight: 600;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background: rgba(17, 24, 39, 0.03);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.3px;
 }
 
 .table tbody tr {
@@ -635,34 +645,35 @@ export default {
 }
 
 .table tbody tr:hover {
-  background-color: #f8f9fa;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: rgba(255, 68, 0, 0.03);
 }
 
 /* Status Styles */
 .status-pending {
-  color: #ffc107;
-  font-weight: bold;
-  background-color: rgba(255, 193, 7, 0.1);
+  color: #b58900;
+  font-weight: 800;
+  background-color: rgba(241, 196, 15, 0.12);
+  border: 1px solid rgba(241, 196, 15, 0.30);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
 }
 
 .status-active {
-  color: #28a745;
-  font-weight: bold;
-  background-color: rgba(40, 167, 69, 0.1);
+  color: #2ecc71;
+  font-weight: 800;
+  background-color: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.25);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
 }
 
 .status-ended {
-  color: #dc3545;
-  font-weight: bold;
-  background-color: rgba(220, 53, 69, 0.1);
+  color: #e74c3c;
+  font-weight: 800;
+  background-color: rgba(231, 76, 60, 0.10);
+  border: 1px solid rgba(231, 76, 60, 0.25);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -689,14 +700,15 @@ export default {
 }
 
 .modal-content {
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
+  background-color: #fff;
+  padding: 22px;
+  border-radius: var(--radius);
   width: 700px;
   max-width: 95%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   animation: slideIn 0.3s ease;
 }
 
@@ -737,11 +749,11 @@ export default {
   align-items: center;
   margin-bottom: 25px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-header h3 {
-  color: #333;
+  color: var(--text);
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
@@ -753,7 +765,7 @@ export default {
   font-size: 24px;
   cursor: pointer;
   color: #999;
-  transition: color 0.3s ease;
+  transition: color .15s ease;
 }
 
 .close:hover {
@@ -768,25 +780,25 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #555;
-  font-weight: 500;
+  color: var(--muted);
+  font-weight: 700;
   font-size: 14px;
 }
 
 .form-control {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   font-size: 14px;
-  transition: border-color 0.3s ease;
+  transition: border-color .15s ease, box-shadow .15s ease;
   box-sizing: border-box;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: #ff4400;
-  box-shadow: 0 0 0 3px rgba(255, 68, 0, 0.1);
+  border-color: rgba(255, 68, 0, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 68, 0, 0.12);
 }
 
 .form-control.is-invalid {
@@ -811,7 +823,7 @@ textarea.form-control {
   gap: 12px;
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border);
 }
 
 /* Image Preview */
@@ -819,8 +831,8 @@ textarea.form-control {
   max-width: 200px;
   max-height: 150px;
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
 }
 
 .image-preview img {
@@ -831,36 +843,37 @@ textarea.form-control {
 
 /* Activity Products */
 .activity-product-item {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 20px;
   margin-bottom: 20px;
-  background-color: #fafafa;
-  transition: all 0.3s ease;
+  background-color: rgba(17, 24, 39, 0.02);
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 
 .activity-product-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .activity-product-item h4 {
-  color: #333;
+  color: var(--text);
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 18px;
   font-weight: 600;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 10px;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: rgba(17, 24, 39, 0.06);
+  color: var(--text);
+  border-color: rgba(17, 24, 39, 0.14);
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
+  background-color: rgba(17, 24, 39, 0.10);
 }
 
 /* Responsive Design */

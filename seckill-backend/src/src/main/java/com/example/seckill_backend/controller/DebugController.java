@@ -2,7 +2,7 @@ package com.example.seckill_backend.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +20,16 @@ public class DebugController {
     
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
     
-    @Value("${spring.web.resources.static-locations}")
-    private String staticLocations;
+    private final WebProperties webProperties;
+
+    public DebugController(WebProperties webProperties) {
+        this.webProperties = webProperties;
+    }
     
     @GetMapping("/static-config")
     public ResponseEntity<String> getStaticConfig() {
-        return ResponseEntity.ok("静态资源配置: " + staticLocations);
+        String[] locations = webProperties.getResources().getStaticLocations();
+        return ResponseEntity.ok("静态资源配置: " + String.join(", ", locations));
     }
     
     @GetMapping("/upload-dir")

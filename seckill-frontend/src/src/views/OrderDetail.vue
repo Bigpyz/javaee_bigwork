@@ -204,7 +204,7 @@ export default {
       return date.toLocaleString('zh-CN');
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -212,46 +212,68 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background: transparent;
 }
 
 .header {
-  background-color: #ff4400;
-  color: white;
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--primary), #ff6633);
+  color: #fff;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.10);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .header h1 {
   margin: 0;
   font-size: 1.5rem;
+  letter-spacing: 0.3px;
 }
 
 .user-info {
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-info a {
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  transition: background-color .15s ease, transform .15s ease;
+}
+
+.user-info a:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
 .user-info button {
-  background: none;
-  border: 1px solid white;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
   cursor: pointer;
   margin-left: 0.5rem;
+  transition: transform .15s ease, background-color .15s ease;
 }
 
 .user-info button:hover {
-  background-color: white;
-  color: #ff4400;
+  background-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
 }
 
 .main {
   flex: 1;
-  padding: 2rem;
+  padding: 24px 16px;
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
@@ -260,27 +282,33 @@ export default {
 
 .loading, .error {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: 60px 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
-  color: #ff4400;
+  color: var(--primary);
 }
 
 .order-container {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.80);
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
 }
 
 .order-container h2 {
   margin-top: 0;
-  color: #333;
-  border-bottom: 2px solid #ff4400;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  color: var(--text);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 68, 0, 0.22);
 }
 
 .order-info, .product-info, .payment-info {
@@ -290,99 +318,143 @@ export default {
 .order-item, .product-item, .payment-item {
   display: flex;
   margin-bottom: 0.75rem;
+  gap: 12px;
 }
 
 .label {
   width: 120px;
   font-weight: bold;
-  color: #666;
+  color: var(--muted);
 }
 
 .value {
-  color: #333;
+  color: var(--text);
 }
 
 .status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.10);
+  background: rgba(17, 24, 39, 0.02);
 }
 
 .status.pending {
-  background-color: #f0ad4e;
-  color: white;
+  border-color: rgba(241, 196, 15, 0.4);
+  background: rgba(241, 196, 15, 0.12);
+  color: #b58900;
 }
 
 .status.paid {
-  background-color: #5cb85c;
-  color: white;
+  border-color: rgba(46, 204, 113, 0.4);
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
 }
 
 .status.shipped {
-  background-color: #337ab7;
-  color: white;
+  border-color: rgba(52, 152, 219, 0.35);
+  background: rgba(52, 152, 219, 0.12);
+  color: #3498db;
 }
 
 .status.completed {
-  background-color: #5bc0de;
-  color: white;
+  border-color: rgba(26, 188, 156, 0.35);
+  background: rgba(26, 188, 156, 0.12);
+  color: #1abc9c;
 }
 
 .status.canceled, .status.expired {
-  background-color: #d9534f;
-  color: white;
+  border-color: rgba(231, 76, 60, 0.35);
+  background: rgba(231, 76, 60, 0.10);
+  color: #e74c3c;
 }
 
 .seckill-price {
-  color: #ff4400;
-  font-weight: bold;
+  color: var(--primary);
+  font-weight: 800;
 }
 
 .total-amount {
-  color: #ff4400;
-  font-weight: bold;
-  font-size: 1.2rem;
+  color: var(--primary);
+  font-weight: 900;
+  font-size: 20px;
 }
 
 .action-buttons {
   display: flex;
   gap: 1rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
 .action-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 800;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
 }
 
 .pay-btn {
-  background-color: #ff4400;
-  color: white;
+  background-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(255, 68, 0, 0.18);
 }
 
 .pay-btn:hover {
-  background-color: #ff5511;
+  background-color: var(--primary-700);
 }
 
 .cancel-btn {
-  background-color: #d9534f;
-  color: white;
+  background-color: rgba(231, 76, 60, 0.12);
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.25);
 }
 
 .cancel-btn:hover {
-  background-color: #c9302c;
+  background-color: rgba(231, 76, 60, 0.18);
 }
 
 .back-btn {
-  background-color: #5bc0de;
-  color: white;
+  background-color: rgba(52, 152, 219, 0.12);
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.25);
 }
 
 .back-btn:hover {
-  background-color: #31b0d5;
+  background-color: rgba(52, 152, 219, 0.18);
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    padding: 14px 16px;
+  }
+
+  .main {
+    padding: 16px;
+  }
+
+  .order-container {
+    padding: 14px;
+  }
+
+  .order-item, .product-item, .payment-item {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .label {
+    width: auto;
+  }
 }
 </style>

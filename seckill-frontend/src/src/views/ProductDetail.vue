@@ -209,9 +209,9 @@ export default {
       try {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const res = await generateCaptcha(userInfo.id, this.product.id);
-        // 获取后端返回的验证码ID和值
+        // 获取后端返回的验证码ID与题目（不返回明文答案）
         this.captchaId = res.data.captchaId;
-        this.captchaCode = res.data.captchaValue;
+        this.captchaCode = res.data.question;
       } catch (err) {
         console.error('生成验证码失败:', err);
         this.captchaId = '';
@@ -334,22 +334,27 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background: transparent;
 }
 
 .header {
-  background-color: #ff4400;
-  color: white;
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--primary), #ff6633);
+  color: #fff;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.10);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .header h1 {
   margin: 0;
   font-size: 1.5rem;
+  letter-spacing: 0.3px;
 }
 
 .user-info {
@@ -357,23 +362,24 @@ export default {
 }
 
 .user-info button {
-  background: none;
-  border: 1px solid white;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
   cursor: pointer;
   margin-left: 0.5rem;
+  transition: transform .15s ease, background-color .15s ease;
 }
 
 .user-info button:hover {
-  background-color: white;
-  color: #ff4400;
+  background-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
 }
 
 .main {
   flex: 1;
-  padding: 2rem;
+  padding: 24px 16px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -382,33 +388,40 @@ export default {
 
 .loading, .error {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: 60px 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
-  color: #ff4400;
+  color: var(--primary);
 }
 
 .product-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.80);
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
 .product-image {
-  margin-bottom: 1.5rem;
+  margin-bottom: 14px;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 300px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.03);
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .product-img {
@@ -418,44 +431,49 @@ export default {
 }
 
 .no-image {
-  color: #999;
-  font-size: 1.2rem;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .product-info h2 {
   margin-top: 0;
-  color: #333;
+  color: var(--text);
+  margin-bottom: 8px;
 }
 
 .description {
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0 0 18px;
 }
 
 .price-section {
-  margin-bottom: 2rem;
+  margin-bottom: 18px;
+  display: grid;
+  gap: 6px;
 }
 
 .original-price {
-  color: #999;
+  color: rgba(107, 114, 128, 0.95);
   text-decoration: line-through;
-  font-size: 1.2rem;
-  margin: 0.5rem 0;
+  font-size: 14px;
+  margin: 0;
 }
 
 .seckill-price {
-  color: #ff4400;
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
+  color: var(--primary);
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
 }
 
 .stock-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 18px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .quantity-control {
@@ -465,32 +483,40 @@ export default {
 }
 
 .quantity-control button {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #ddd;
-  background-color: white;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  background-color: #fff;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 10px;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.quantity-control button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 68, 0, 0.35);
+  background-color: rgba(255, 68, 0, 0.04);
 }
 
 .quantity-control button:disabled {
-  background-color: #f5f5f5;
+  background-color: rgba(17, 24, 39, 0.03);
   cursor: not-allowed;
 }
 
 .quantity-control span {
   width: 30px;
   text-align: center;
+  font-weight: 700;
 }
 
 .activity-info {
-  border-left: 2px solid #ff4400;
-  padding-left: 2rem;
+  border-left: 1px solid rgba(255, 68, 0, 0.25);
+  padding-left: 18px;
 }
 
 .activity-info h3 {
   margin-top: 0;
-  color: #ff4400;
+  color: var(--primary);
 }
 
 .activity-name {
@@ -499,7 +525,7 @@ export default {
 }
 
 .activity-time {
-  color: #666;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
@@ -511,7 +537,7 @@ export default {
 .countdown-title {
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text);
 }
 
 .countdown {
@@ -521,12 +547,12 @@ export default {
 }
 
 .countdown-item {
-  background-color: #ff4400;
-  color: white;
+  background-color: var(--primary);
+  color: #fff;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 10px;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -535,16 +561,17 @@ export default {
 .countdown-item .unit {
   font-size: 0.8rem;
   margin-top: 0.25rem;
+  opacity: 0.9;
 }
 
 .countdown-separator {
   font-size: 1.5rem;
-  color: #ff4400;
+  color: var(--primary);
 }
 
 .countdown-ended {
-  color: #999;
-  font-size: 1.2rem;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .seckill-action {
@@ -552,24 +579,30 @@ export default {
 }
 
 .seckill-btn {
-  background-color: #ff4400;
-  color: white;
+  background-color: var(--primary);
+  color: #fff;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 4px;
+  padding: 12px 16px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 16px;
   width: 100%;
   max-width: 300px;
+  font-weight: 800;
+  box-shadow: 0 12px 26px rgba(255, 68, 0, 0.18);
+  transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease;
 }
 
 .seckill-btn:hover:not(:disabled) {
-  background-color: #ff5511;
+  background-color: var(--primary-700);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(255, 68, 0, 0.22);
 }
 
 .seckill-btn:disabled {
-  background-color: #ccc;
+  background-color: rgba(17, 24, 39, 0.25);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .captcha-section {
@@ -584,14 +617,14 @@ export default {
 }
 
 .captcha-display {
-  background-color: #f9f9f9;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
+  background-color: rgba(17, 24, 39, 0.03);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
   cursor: pointer;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   min-width: 100px;
   text-align: center;
 }
@@ -602,35 +635,38 @@ export default {
 }
 
 .captcha-display:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 68, 0, 0.06);
 }
 
 .refresh-captcha {
-  padding: 0.75rem 1rem;
+  padding: 10px 12px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   cursor: pointer;
-  color: #333;
+  color: var(--text);
+  font-weight: 700;
+  transition: transform .15s ease, background-color .15s ease;
 }
 
 .refresh-captcha:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(255, 68, 0, 0.06);
+  transform: translateY(-1px);
 }
 
 .captcha-input {
   width: 100%;
   max-width: 200px;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   font-size: 1rem;
 }
 
 .captcha-input:focus {
   outline: none;
-  border-color: #ff4400;
-  box-shadow: 0 0 0 2px rgba(255, 68, 0, 0.1);
+  border-color: rgba(255, 68, 0, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 68, 0, 0.12);
 }
 
 @media (max-width: 768px) {
@@ -638,11 +674,12 @@ export default {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+    padding: 14px 16px;
   }
 
   .product-container {
     grid-template-columns: 1fr;
-    padding: 1rem;
+    padding: 14px;
   }
 
   .activity-info {
@@ -651,12 +688,12 @@ export default {
     padding-left: 0;
     padding-top: 2rem;
   }
-  
+
   .captcha-container {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .captcha-input {
     max-width: none;
   }

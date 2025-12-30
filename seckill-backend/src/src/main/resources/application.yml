@@ -2,17 +2,40 @@ server:
   port: 28080
 
 spring:
+  application:
+    name: seckill-backend
   datasource:
-    url: jdbc:mysql://192.168.0.16:3306/seckill?serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false
-    username: seckill
-    password: zxr@123456
+    url: jdbc:mysql://${MYSQL_HOST:192.168.17.170}:${MYSQL_PORT:3306}/${MYSQL_DB:seckill}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:seckill}
+    password: ${MYSQL_PASSWORD:Seckill123456!}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  session:
+    store-type: redis
+    timeout: 30m
+    redis:
+      namespace: seckill:session
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:192.168.17.170}
+      port: ${REDIS_PORT:6379}
+
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.seckill_backend.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+seckill:
+  upload:
+    dir: ./uploads/
+  payment:
+    callback:
+      secret: demo-secret
+      allowed-skew-seconds: 300

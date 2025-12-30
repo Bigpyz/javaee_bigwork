@@ -1,9 +1,11 @@
 package com.example.seckill_backend.controller;
 
+import com.example.seckill_backend.common.ApiResponse;
 import com.example.seckill_backend.model.Activity;
 import com.example.seckill_backend.model.ActivityProduct;
 import com.example.seckill_backend.model.ActivityStats;
 import com.example.seckill_backend.model.dto.ActivityWithProductsDTO;
+
 import com.example.seckill_backend.service.ActivityService;
 import com.example.seckill_backend.service.ActivityStatsService;
 import lombok.RequiredArgsConstructor;
@@ -16,91 +18,93 @@ import java.util.List;
 @RequestMapping("/api/activities")
 @RequiredArgsConstructor
 public class ActivityController {
+
     private final ActivityService activityService;
     private final ActivityStatsService activityStatsService;
 
     @PostMapping
-    public Activity createActivity(@RequestBody Activity activity) {
-        return activityService.createActivity(activity);
+    public ApiResponse<Activity> createActivity(@RequestBody Activity activity) {
+        return ApiResponse.success(activityService.createActivity(activity));
     }
 
     @PostMapping("/with-products")
-    public Activity createActivityWithProducts(@RequestBody ActivityWithProductsDTO dto) {
-        return activityService.createActivityWithProducts(dto);
+    public ApiResponse<Activity> createActivityWithProducts(@RequestBody ActivityWithProductsDTO dto) {
+        return ApiResponse.success(activityService.createActivityWithProducts(dto));
     }
 
     @PutMapping("/{id}")
-    public Activity updateActivity(@PathVariable Long id, @RequestBody Activity activity) {
+    public ApiResponse<Activity> updateActivity(@PathVariable Long id, @RequestBody Activity activity) {
         activity.setId(id);
-        return activityService.updateActivity(activity);
+        return ApiResponse.success(activityService.updateActivity(activity));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteActivity(@PathVariable Long id) {
+    public ApiResponse<Void> deleteActivity(@PathVariable Long id) {
         activityService.deleteActivity(id);
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/{id}")
-    public Activity getActivityById(@PathVariable Long id) {
-        return activityService.getActivityById(id);
+    public ApiResponse<Activity> getActivityById(@PathVariable Long id) {
+        return ApiResponse.success(activityService.getActivityById(id));
     }
 
     @GetMapping
-    public List<Activity> getAllActivities() {
-        return activityService.getAllActivities();
+    public ApiResponse<List<Activity>> getAllActivities() {
+        return ApiResponse.success(activityService.getAllActivities());
     }
 
     @GetMapping("/status/{status}")
-    public List<Activity> getActivitiesByStatus(@PathVariable int status) {
-        return activityService.getActivitiesByStatus(status);
+    public ApiResponse<List<Activity>> getActivitiesByStatus(@PathVariable int status) {
+        return ApiResponse.success(activityService.getActivitiesByStatus(status));
     }
 
     @GetMapping("/upcoming")
-    public List<Activity> getUpcomingActivities() {
-        return activityService.getUpcomingActivities();
+    public ApiResponse<List<Activity>> getUpcomingActivities() {
+        return ApiResponse.success(activityService.getUpcomingActivities());
     }
 
     @GetMapping("/active")
-    public List<Activity> getActiveActivities() {
-        return activityService.getActiveActivities();
+    public ApiResponse<List<Activity>> getActiveActivities() {
+        return ApiResponse.success(activityService.getActiveActivities());
     }
 
     @PostMapping("/{id}/start")
-    public boolean startActivity(@PathVariable Long id) {
-        return activityService.startActivity(id);
+    public ApiResponse<Boolean> startActivity(@PathVariable Long id) {
+        return ApiResponse.success(activityService.startActivity(id));
     }
 
     @PostMapping("/{id}/end")
-    public boolean endActivity(@PathVariable Long id) {
-        return activityService.endActivity(id);
+    public ApiResponse<Boolean> endActivity(@PathVariable Long id) {
+        return ApiResponse.success(activityService.endActivity(id));
     }
 
     @PostMapping("/products")
-    public ActivityProduct addProductToActivity(@RequestBody ActivityProduct activityProduct) {
-        return activityService.addProductToActivity(activityProduct);
+    public ApiResponse<ActivityProduct> addProductToActivity(@RequestBody ActivityProduct activityProduct) {
+        return ApiResponse.success(activityService.addProductToActivity(activityProduct));
     }
 
     @GetMapping("/{id}/products")
-    public List<ActivityProduct> getProductsByActivityId(@PathVariable Long id) {
-        return activityService.getProductsByActivityId(id);
+    public ApiResponse<List<ActivityProduct>> getProductsByActivityId(@PathVariable Long id) {
+        return ApiResponse.success(activityService.getProductsByActivityId(id));
     }
 
     @PostMapping("/update-status")
-    public void updateActivityStatus() {
+    public ApiResponse<Void> updateActivityStatus() {
         activityService.updateActivityStatus();
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/{id}/stats")
-    public ActivityStats getActivityStats(@PathVariable Long id) {
-        return activityStatsService.getActivityStats(id);
+    public ApiResponse<ActivityStats> getActivityStats(@PathVariable Long id) {
+        return ApiResponse.success(activityStatsService.getActivityStats(id));
     }
 
     @PostMapping("/{id}/record-visit")
-    public void recordVisit(@PathVariable Long id, @RequestParam(required = false) Long userId, HttpServletRequest request) {
+    public ApiResponse<Void> recordVisit(@PathVariable Long id, @RequestParam(required = false) Long userId, HttpServletRequest request) {
         String ipAddress = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         activityStatsService.recordVisit(id, userId, ipAddress, userAgent);
+        return ApiResponse.success(null);
     }
-
-
 }

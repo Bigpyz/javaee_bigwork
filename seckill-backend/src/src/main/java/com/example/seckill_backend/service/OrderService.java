@@ -2,6 +2,7 @@ package com.example.seckill_backend.service;
 
 import com.example.seckill_backend.model.Order;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrderService {
@@ -13,5 +14,5 @@ public interface OrderService {
     boolean cancelOrder(Long orderId);
     boolean payOrder(Long orderId);
     void processExpiredOrders();
-    boolean handlePaymentCallback(String orderNo);
+    boolean handlePaymentCallback(String orderNo, BigDecimal amount, long timestamp, String nonce, String signature);
 }

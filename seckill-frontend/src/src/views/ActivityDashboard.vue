@@ -158,7 +158,7 @@ export default {
       return ((totalOrders / this.stats.uv) * 100).toFixed(2)
     },
     goBack() {
-      this.$router.push('/activity-management')
+      this.$router.push('/admin/activity-management')
     }
   }
 }
@@ -168,17 +168,17 @@ export default {
 .activity-dashboard {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 16px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .activity-dashboard h2 {
-  color: #333;
+  color: var(--text);
   margin-bottom: 25px;
   font-size: 1.8rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid #ff4400;
+  border-bottom: 1px solid rgba(255, 68, 0, 0.22);
 }
 
 .dashboard-header {
@@ -186,14 +186,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding: 20px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  background-color: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .dashboard-header h3 {
-  color: #ff4400;
+  color: var(--text);
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
@@ -201,27 +202,33 @@ export default {
 
 /* Button Styles */
 .btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
 .btn-primary {
-  background: linear-gradient(90deg, #ff4400, #ff6633);
-  color: white;
-  box-shadow: 0 2px 8px rgba(255, 68, 0, 0.3);
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(255, 68, 0, 0.14);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 68, 0, 0.4);
+  background: var(--primary-700);
+  border-color: var(--primary-700);
+  box-shadow: 0 14px 28px rgba(255, 68, 0, 0.18);
 }
 
 /* Stats Grid */
@@ -233,10 +240,11 @@ export default {
 }
 
 .stat-card {
-  background-color: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
@@ -249,27 +257,27 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #ff4400, #ff6633);
+  height: 3px;
+  background: var(--primary);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .stat-title {
   font-size: 14px;
-  color: #666;
+  color: var(--muted);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: bold;
-  color: #333;
+  color: var(--text);
   margin-bottom: 5px;
 }
 
@@ -281,24 +289,25 @@ export default {
 }
 
 .chart-card {
-  background-color: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
   transition: all 0.3s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow);
 }
 
 .chart-card h4 {
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text);
   font-size: 1.2rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 /* Chart Styles */
@@ -318,13 +327,13 @@ export default {
   width: 90px;
   font-size: 14px;
   font-weight: 500;
-  color: #555;
+  color: var(--muted);
 }
 
 .chart-bar {
   flex: 1;
   height: 25px;
-  background-color: #f5f5f5;
+  background-color: rgba(17, 24, 39, 0.06);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -355,15 +364,15 @@ export default {
 }
 
 .chart-fill.pending {
-  background: linear-gradient(90deg, #ffc107, #ffd54f);
+  background: linear-gradient(90deg, #f1c40f, #ffd54f);
 }
 
 .chart-fill.completed {
-  background: linear-gradient(90deg, #28a745, #4caf50);
+  background: linear-gradient(90deg, #2ecc71, #4caf50);
 }
 
 .chart-fill.cancelled {
-  background: linear-gradient(90deg, #dc3545, #f44336);
+  background: linear-gradient(90deg, #e74c3c, #f44336);
 }
 
 .chart-value {
@@ -371,7 +380,7 @@ export default {
   text-align: right;
   font-size: 14px;
   font-weight: bold;
-  color: #333;
+  color: var(--text);
 }
 
 /* Sales Summary */
@@ -385,10 +394,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 14px;
+  background: rgba(17, 24, 39, 0.02);
   border-radius: 10px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .sales-item:hover {
@@ -398,14 +408,14 @@ export default {
 
 .sales-label {
   font-size: 14px;
-  color: #666;
+  color: var(--muted);
   font-weight: 500;
 }
 
 .sales-value {
   font-size: 20px;
   font-weight: bold;
-  color: #ff4400;
+  color: var(--primary);
 }
 
 /* Loading and Error States */
@@ -413,10 +423,11 @@ export default {
   text-align: center;
   padding: 80px 20px;
   font-size: 18px;
-  color: #666;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  color: var(--muted);
+  background-color: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
 }
 
 .loading::after {
@@ -426,7 +437,7 @@ export default {
   height: 40px;
   margin: 20px auto;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #ff4400;
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -440,6 +451,12 @@ export default {
 @media (max-width: 768px) {
   .activity-dashboard {
     padding: 10px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   
   .stats-grid {

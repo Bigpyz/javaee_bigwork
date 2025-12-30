@@ -17,7 +17,8 @@
             quantity = #{quantity},
             total_amount = #{totalAmount},
             status = #{status},
-            payment_time = #{paymentTime}
+            payment_time = #{paymentTime},
+            update_time = NOW()
         WHERE id = #{id}
     </update>
 
@@ -59,7 +60,8 @@
 
     <update id="updateStatus">
         UPDATE `order`
-        SET status = #{status}
+        SET status = #{status},
+            update_time = NOW()
         WHERE id = #{id}
     </update>
 

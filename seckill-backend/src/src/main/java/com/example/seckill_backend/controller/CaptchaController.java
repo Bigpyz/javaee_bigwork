@@ -1,6 +1,9 @@
 package com.example.seckill_backend.controller;
 
+import com.example.seckill_backend.common.ApiResponse;
+import com.example.seckill_backend.model.dto.CaptchaVerifyRequest;
 import com.example.seckill_backend.service.CaptchaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,30 +16,21 @@ import java.util.Map;
 public class CaptchaController {
     
     private final CaptchaService captchaService;
-    
-    /**
-     * 生成验证码
-     * @param userId 用户ID
-     * @param productId 商品ID
-     * @return 验证码ID
-     */
+
     @GetMapping("/generate")
-    public Map<String, String> generateCaptcha(@RequestParam Long userId, @RequestParam Long productId) {
-        // 直接返回包含验证码ID和值的Map
-        return captchaService.generateCaptcha(userId, productId);
+    public ApiResponse<Map<String, String>> generateCaptcha(@RequestParam Long userId, @RequestParam Long productId) {
+        return ApiResponse.success(captchaService.generateCaptcha(userId, productId));
     }
-    
-    /**
-     * 验证验证码
-     * @param captchaId 验证码ID
-     * @param captchaValue 用户输入的验证码值
-     * @return 验证结果
-     */
+
     @PostMapping("/verify")
-    public Map<String, Boolean> verifyCaptcha(@RequestParam String captchaId, @RequestParam String captchaValue) {
-        boolean isValid = captchaService.verifyCaptcha(captchaId, captchaValue);
+    public ApiResponse<Map<String, Boolean>> verifyCaptcha(@Valid @RequestBody CaptchaVerifyRequest request) {
+        boolean isValid = captchaService.verifyCaptcha(
+                request.getCaptchaId(),
+                request.getCaptchaValue(),
+                request.getUserId(),
+                request.getProductId());
         Map<String, Boolean> result = new HashMap<>();
         result.put("isValid", isValid);
-        return result;
+        return ApiResponse.success(result);
     }
 }

@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { login } from '../api/user';
+import { adminLogin } from '../api/user';
 
 // 管理员账号配置
 const ADMIN_CREDENTIALS = {
@@ -84,39 +84,20 @@ export default {
       this.error = '';
       
       try {
-        // 检查是否为预设的管理员账号
-        if (this.username === ADMIN_CREDENTIALS.username && this.password === ADMIN_CREDENTIALS.password) {
-          // 保存管理员登录信息
-          localStorage.setItem('adminInfo', JSON.stringify({
-            username: this.username,
-            token: 'admin-token-' + Date.now(),
-            isAdmin: true
-          }));
-          
-          // 跳转到活动管理页面
-          this.$router.push('/admin/activity-management');
+        const response = await adminLogin(this.username, this.password)
+        const ok = response && response.data === true
+        if (!ok) {
+          this.error = '登录失败，请检查用户名和密码';
           return;
         }
-        
-        // 如果不是预设账号，尝试调用API
-        const response = await login({
+
+        localStorage.setItem('adminInfo', JSON.stringify({
           username: this.username,
-          password: this.password
-        });
-        
-        if (response.data && response.data.token) {
-          // 保存管理员登录信息
-          localStorage.setItem('adminInfo', JSON.stringify({
-            username: this.username,
-            token: response.data.token,
-            isAdmin: true
-          }));
-          
-          // 跳转到活动管理页面
-          this.$router.push('/admin/activity-management');
-        } else {
-          this.error = '登录失败，请检查用户名和密码';
-        }
+          token: 'admin-token-' + Date.now(),
+          isAdmin: true
+        }));
+
+        this.$router.push('/admin/activity-management');
       } catch (err) {
         this.error = '登录失败，请检查用户名和密码';
         console.error('管理员登录失败:', err);
@@ -134,24 +115,29 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: radial-gradient(900px 600px at 20% 0%, rgba(255, 68, 0, 0.14), transparent 55%),
+    radial-gradient(900px 600px at 90% 10%, rgba(99, 102, 241, 0.14), transparent 55%),
+    var(--bg);
+  padding: 24px;
 }
 
 .login-container {
   width: 100%;
   max-width: 400px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .login-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 30px 20px;
+  background: rgba(255, 68, 0, 0.08);
+  color: var(--text);
+  padding: 22px 20px;
   text-align: center;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .login-header h1 {
@@ -163,7 +149,7 @@ export default {
 .login-header p {
   margin: 0;
   font-size: 16px;
-  opacity: 0.9;
+  color: var(--muted);
 }
 
 .login-form {
@@ -177,23 +163,24 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  color: #333;
+  font-weight: 700;
+  color: var(--muted);
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
-  transition: border-color 0.3s;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .form-group input:focus {
-  border-color: #667eea;
   outline: none;
+  border-color: rgba(255, 68, 0, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 68, 0, 0.12);
 }
 
 .form-actions {
@@ -203,18 +190,21 @@ export default {
 .login-btn {
   width: 100%;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 800;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  box-shadow: 0 10px 22px rgba(255, 68, 0, 0.18);
 }
 
 .login-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  background: var(--primary-700);
+  border-color: var(--primary-700);
 }
 
 .login-btn:disabled {
@@ -225,41 +215,26 @@ export default {
 .error-message {
   margin-top: 15px;
   padding: 10px;
-  background-color: #fff2f0;
-  border: 1px solid #ffccc7;
-  border-radius: 6px;
-  color: #ff4d4f;
+  background-color: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.22);
+  border-radius: 10px;
+  color: #e74c3c;
   font-size: 14px;
 }
 
 .admin-hint {
   margin-top: 20px;
   padding: 15px;
-  background-color: #f6f8fa;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #656d76;
-}
-
-.admin-hint p {
-  margin: 5px 0;
-}
-
-.admin-hint p:first-child {
-  font-weight: 500;
-  margin-bottom: 10px;
-  color: #24292f;
 }
 
 .login-footer {
   padding: 20px;
   text-align: center;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .back-link {
-  color: #667eea;
+  color: var(--primary);
   text-decoration: none;
   font-size: 14px;
 }

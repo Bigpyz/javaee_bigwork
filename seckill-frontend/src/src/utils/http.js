@@ -5,6 +5,7 @@ import apiConfig from '../config/api'
 const http = axios.create({
   baseURL: apiConfig.REQUEST_BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -14,10 +15,6 @@ const http = axios.create({
 http.interceptors.request.use(
   config => {
     // 在发送请求之前做些什么
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
     return config
   },
   error => {
@@ -30,6 +27,18 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   response => {
     // 对响应数据做点什么
+    const body = response && response.data
+    if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'code')
+      && Object.prototype.hasOwnProperty.call(body, 'message')
+      && Object.prototype.hasOwnProperty.call(body, 'data')) {
+      if (String(body.code) !== '0') {
+        const err = new Error(body.message || '请求失败')
+        err.response = response
+        return Promise.reject(err)
+      }
+      response.data = body.data
+      return response
+    }
     return response
   },
   error => {
@@ -37,10 +46,10 @@ http.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          // 未授权，跳转到登录页
+          // 未授权，清除本地登录缓存
           localStorage.removeItem('token')
           localStorage.removeItem('userInfo')
-          window.location.href = '/login'
+          localStorage.removeItem('adminInfo')
           break
         case 403:
           // 权限不足

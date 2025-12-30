@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <header class="header">
+    <header v-if="showHeader" class="header">
       <h1>在线秒杀系统</h1>
       <div class="header-actions">
         <div class="user-info">
@@ -47,9 +47,9 @@
             </div>
             
             <!-- 活动内容 -->
-            <div class="timeline-content">
+            <div class="timeline-content" @click="goToActivityDetail(activity.id)">
               <div class="activity-header">
-                <h3>{{ activity.name }}</h3>
+                <h3 class="activity-title">{{ activity.name }}</h3>
                 <div class="activity-badge" :class="{ 'upcoming': !isActiveActivity(activity) }">
                   {{ isActiveActivity(activity) ? '进行中' : '即将开始' }}
                 </div>
@@ -93,7 +93,7 @@
                       <button 
                         class="seckill-btn" 
                         :disabled="!isLoggedIn || product.seckillStock <= 0"
-                        @click="goToProductDetail(product.productId, activity.id)"
+                        @click.stop="goToProductDetail(product.productId, activity.id)"
                       >
                         立即秒杀
                       </button>
@@ -115,6 +115,12 @@ import { getProductById } from '../api/product';
 
 export default {
   name: "Home",
+  props: {
+    showHeader: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       activeActivities: [],
@@ -203,6 +209,9 @@ export default {
     }
   },
   methods: {
+    goToActivityDetail(activityId) {
+      this.$router.push(`/activity/${activityId}`)
+    },
     async loadActivities(showLoading = true) {
       this.error = '';
       if (showLoading) {
@@ -472,17 +481,17 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background: transparent;
 }
 
 .header {
-  background: linear-gradient(135deg, #ff4400, #ff6633);
-  color: white;
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--primary), #ff6633);
+  color: #fff;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 16px rgba(255, 68, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.10);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -561,7 +570,7 @@ export default {
 
 .main {
   flex: 1;
-  padding: 2rem;
+  padding: 24px 16px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -570,10 +579,12 @@ export default {
 
 .seckill-section {
   margin-bottom: 2rem;
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.80);
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
 }
@@ -589,7 +600,7 @@ export default {
 
 .section-title {
   margin-top: 0;
-  color: #333;
+  color: var(--text);
   font-size: 1.8rem;
   font-weight: 700;
   position: relative;
@@ -632,7 +643,7 @@ export default {
   transform: translateX(-50%);
   width: 60px;
   height: 4px;
-  background: linear-gradient(90deg, #ff4400, #ff6633);
+  background: linear-gradient(90deg, var(--primary), #ff6633);
   border-radius: 2px;
 }
 

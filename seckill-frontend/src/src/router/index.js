@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 import Register from "@/views/Register.vue";
 import Login from "@/views/Login.vue";
 import ProductDetail from "@/views/ProductDetail.vue";
@@ -10,15 +9,41 @@ import ActivityManagement from "@/views/ActivityManagement.vue";
 import ActivityDashboard from "@/views/ActivityDashboard.vue";
 import ActivityDetail from "@/views/ActivityDetail.vue";
 import AdminLogin from "@/views/AdminLogin.vue";
+import MainLayout from "@/layouts/MainLayout.vue";
+import ProductsPage from "@/views/ProductsPage.vue";
+import Home from "@/views/Home.vue";
+import ProfilePage from "@/views/ProfilePage.vue";
+import { me } from "@/api/user";
 
 Vue.use(VueRouter)
 
 const routes = [
-  // 用户端路由
   {
     path: "/",
-    name: "Home",
-    component: Home,
+    component: MainLayout,
+    children: [
+      {
+        path: "",
+        name: "Home",
+        component: ProductsPage,
+      },
+      {
+        path: "activities",
+        name: "Activities",
+        component: Home,
+        props: { showHeader: false },
+      },
+      {
+        path: "activity/:id",
+        name: "ActivityDetailPublic",
+        component: ActivityDetail,
+      },
+      {
+        path: "profile",
+        name: "Profile",
+        component: ProfilePage,
+      },
+    ]
   },
   {
     path: "/register",
@@ -90,8 +115,17 @@ router.beforeEach((to, from, next) => {
   const isAdminLoggedIn = localStorage.getItem('adminInfo');
   
   if (requiresUserAuth.includes(to.name) && !isLoggedIn) {
-    // 用户未登录且尝试访问需要登录的页面，重定向到登录页
-    next({ name: 'Login' });
+    me().then(res => {
+      if (res && res.data) {
+        localStorage.setItem('userInfo', JSON.stringify(res.data));
+        next();
+        return;
+      }
+      next({ name: 'Login' });
+    }).catch(() => {
+      next({ name: 'Login' });
+    });
+    return;
   } else if (requiresAdminAuth.includes(to.name) && !isAdminLoggedIn) {
     // 管理员未登录且尝试访问需要管理员权限的页面，重定向到管理员登录页
     next({ name: 'AdminLogin' });

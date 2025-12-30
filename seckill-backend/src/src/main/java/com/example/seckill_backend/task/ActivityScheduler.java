@@ -56,7 +56,7 @@ public class ActivityScheduler {
                 }
                 
                 // 更新订单状态为已取消
-                order.setStatus(3); // 3: 已取消
+                order.setStatus(5); // 5: 超时未支付
                 order.setUpdateTime(new Date());
                 orderMapper.update(order);
                 

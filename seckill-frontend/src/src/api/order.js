@@ -2,15 +2,13 @@
 import http from '../utils/http';
 
 export function createSeckillOrder(userId, activityId, productId, quantity = 1, captchaId, captchaValue) {
-  return http.post(`/api/orders/seckill`, null, {
-    params: {
-      userId,
-      activityId,
-      productId,
-      quantity,
-      captchaId,
-      captchaValue
-    }
+  return http.post(`/api/orders/seckill`, {
+    userId,
+    activityId,
+    productId,
+    quantity,
+    captchaId,
+    captchaValue
   });
 }
 
