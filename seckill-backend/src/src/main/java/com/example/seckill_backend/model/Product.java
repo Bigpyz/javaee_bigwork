@@ -5,6 +5,9 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ *商品类
+ */
 @Data
 public class Product {
     private Long id;
