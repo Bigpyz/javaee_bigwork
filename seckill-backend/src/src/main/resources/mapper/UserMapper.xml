@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.seckill_backend.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.example.seckill_backend.model.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="status" column="status"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+    </resultMap>
+
+    <select id="getUserById" resultMap="UserResultMap">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <select id="getUserByUsername" resultMap="UserResultMap">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
+    <insert id="insertUser" parameterType="com.example.seckill_backend.model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, register_time, status)
+        VALUES (#{username}, #{password}, NOW(), 1)
+    </insert>
+
+    <update id="updateUser" parameterType="com.example.seckill_backend.model.User">
+        UPDATE user SET 
+            username = #{username}, 
+            password = #{password}, 
+            phone = #{phone}, 
+            email = #{email}, 
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUser">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
+    <update id="updateLastLoginTime">
+        UPDATE user SET last_login_time = #{lastLoginTime} WHERE id = #{id}
+    </update>
+
+    <select id="countNewUsersByRegisterTime" resultType="int">
+        SELECT COUNT(*) FROM user 
+        WHERE id = #{id} 
+        AND register_time &gt;= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </select>
+
+</mapper>

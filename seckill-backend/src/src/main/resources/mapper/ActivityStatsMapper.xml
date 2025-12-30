@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ActivityStatsMapper">
+
+    <select id="selectByActivityId" parameterType="long" resultType="com.example.seckill_backend.model.ActivityStats">
+        SELECT * FROM activity_stats WHERE activity_id = #{activityId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.ActivityStats" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity_stats (activity_id, activity_name, pv, uv, participants, sold_quantity, total_gmv, 
+                                   pending_orders, completed_orders, cancelled_orders, update_time)
+        VALUES (#{activityId}, #{activityName}, #{pv}, #{uv}, #{participants}, #{soldQuantity}, #{totalGmv}, 
+               #{pendingOrders}, #{completedOrders}, #{cancelledOrders}, NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.seckill_backend.model.ActivityStats">
+        UPDATE activity_stats
+        SET activity_name = #{activityName},
+            pv = #{pv},
+            uv = #{uv},
+            participants = #{participants},
+            sold_quantity = #{soldQuantity},
+            total_gmv = #{totalGmv},
+            pending_orders = #{pendingOrders},
+            completed_orders = #{completedOrders},
+            cancelled_orders = #{cancelledOrders}
+        WHERE activity_id = #{activityId}
+    </update>
+
+    <update id="updatePVAndUV">
+        UPDATE activity_stats
+        SET pv = pv + #{pv},
+            uv = uv + #{uv},
+            update_time = NOW()
+        WHERE activity_id = #{activityId}
+    </update>
+
+    <update id="updateOrderStats">
+        UPDATE activity_stats
+        SET participants = #{participants},
+            sold_quantity = #{soldQuantity},
+            total_gmv = #{totalGmv},
+            pending_orders = #{pendingOrders},
+            completed_orders = #{completedOrders},
+            cancelled_orders = #{cancelledOrders}
+        WHERE activity_id = #{activityId}
+    </update>
+</mapper>

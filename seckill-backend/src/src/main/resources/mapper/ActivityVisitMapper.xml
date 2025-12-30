@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ActivityVisitMapper">
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.ActivityVisit" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity_visit (activity_id, user_id, ip_address, user_agent, visit_time, is_unique)
+        VALUES (#{activityId}, #{userId}, #{ipAddress}, #{userAgent}, NOW(), #{isUnique})
+    </insert>
+
+    <select id="countPVByActivityId" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM activity_visit WHERE activity_id = #{activityId}
+    </select>
+
+    <select id="countUVByActivityId" parameterType="long" resultType="int">
+        SELECT COUNT(DISTINCT CASE WHEN user_id IS NOT NULL THEN user_id ELSE ip_address END) 
+        FROM activity_visit 
+        WHERE activity_id = #{activityId}
+    </select>
+
+    <select id="checkIfUniqueVisitor" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM activity_visit 
+        WHERE activity_id = #{activityId}
+        AND (
+            (user_id = #{userId} AND user_id IS NOT NULL) 
+            OR (
+                user_id IS NULL 
+                AND ip_address = #{ipAddress}
+            )
+        )
+    </select>
+</mapper>

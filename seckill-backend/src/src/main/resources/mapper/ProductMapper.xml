@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ProductMapper">
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.Product" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product (name, description, image_url, activity_id, original_price, seckill_price, total_stock, seckill_stock, status)
+        VALUES (#{name}, #{description}, #{imageUrl}, #{activityId}, #{originalPrice}, #{seckillPrice}, #{totalStock}, #{seckillStock}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.example.seckill_backend.model.Product">
+        UPDATE product
+        SET name = #{name},
+            description = #{description},
+            image_url = #{imageUrl},
+            activity_id = #{activityId},
+            original_price = #{originalPrice},
+            seckill_price = #{seckillPrice},
+            total_stock = #{totalStock},
+            seckill_stock = #{seckillStock},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="long" resultType="com.example.seckill_backend.model.Product">
+        SELECT * FROM product WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="com.example.seckill_backend.model.Product">
+        SELECT * FROM product
+    </select>
+
+</mapper>

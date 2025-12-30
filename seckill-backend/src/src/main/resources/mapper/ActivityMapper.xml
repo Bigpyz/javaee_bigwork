@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.seckill_backend.mapper.ActivityMapper">
+
+    <insert id="insert" parameterType="com.example.seckill_backend.model.Activity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity (name, start_time, end_time, status, rule, create_time, update_time)
+        VALUES (#{name}, #{startTime}, #{endTime}, #{status}, #{rule}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.seckill_backend.model.Activity">
+        UPDATE activity
+        SET name = #{name},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            status = #{status},
+            rule = #{rule},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM activity WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="long" resultType="com.example.seckill_backend.model.Activity">
+        SELECT * FROM activity WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="com.example.seckill_backend.model.Activity">
+        SELECT * FROM activity
+    </select>
+
+    <select id="selectByStatus" parameterType="int" resultType="com.example.seckill_backend.model.Activity">
+        SELECT * FROM activity WHERE status = #{status}
+    </select>
+
+    <select id="selectUpcoming" resultType="com.example.seckill_backend.model.Activity">
+        SELECT * FROM activity WHERE start_time &gt; UTC_TIMESTAMP() AND status = 0
+    </select>
+
+    <select id="selectActive" resultType="com.example.seckill_backend.model.Activity">
+        SELECT * FROM activity WHERE start_time &lt;= UTC_TIMESTAMP() AND end_time &gt;= UTC_TIMESTAMP() AND status = 1
+    </select>
+
+    <update id="updateStatus">
+        UPDATE activity
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+</mapper>
