@@ -69,6 +69,7 @@
             <!-- 商品设置部分 -->
             <div class="form-group">
               <label>秒杀商品设置</label>
+              <div v-if="showEditForm" class="hint-text">编辑模式：已关联商品仅展示（不可直接修改商品基本信息），支持点击“添加商品”新增商品到本活动。</div>
               <div v-if="errors.activityProducts && errors.activityProducts.length === 1 && !errors.activityProducts[0].name" class="invalid-feedback mb-2">
                 {{ errors.activityProducts[0] }}
               </div>
@@ -78,12 +79,12 @@
                   <div class="row">
                     <div class="col-md-6">
                       <label>商品名称</label>
-                      <input type="text" v-model="product.name" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.name }">
+                      <input type="text" v-model="product.name" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.name }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.name" class="invalid-feedback">{{ errors.activityProducts[index].name }}</div>
                     </div>
                     <div class="col-md-6">
                       <label>商品图片</label>
-                      <input type="file" accept="image/*" class="form-control" @change="handleFileSelect(index, $event)">
+                      <input type="file" accept="image/*" class="form-control" @change="handleFileSelect(index, $event)" :disabled="product.__readonly">
                       <div v-if="product.imagePreview" class="image-preview mt-2">
                         <img :src="product.imagePreview" :alt="product.name" class="img-thumbnail">
                       </div>
@@ -92,39 +93,39 @@
                   <div class="row mt-3">
                     <div class="col-md-12">
                       <label>商品描述</label>
-                      <textarea v-model="product.description" class="form-control" rows="2"></textarea>
+                      <textarea v-model="product.description" class="form-control" rows="2" :disabled="product.__readonly"></textarea>
                     </div>
                   </div>
                   <div class="row mt-3">
                     <div class="col-md-3">
                       <label>原价</label>
-                      <input type="number" v-model="product.originalPrice" step="0.01" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.originalPrice }">
+                      <input type="number" v-model="product.originalPrice" step="0.01" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.originalPrice }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.originalPrice" class="invalid-feedback">{{ errors.activityProducts[index].originalPrice }}</div>
                     </div>
                     <div class="col-md-3">
                       <label>秒杀价格</label>
-                      <input type="number" v-model="product.seckillPrice" step="0.01" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.seckillPrice }">
+                      <input type="number" v-model="product.seckillPrice" step="0.01" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.seckillPrice }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.seckillPrice" class="invalid-feedback">{{ errors.activityProducts[index].seckillPrice }}</div>
                     </div>
                     <div class="col-md-3">
                       <label>总库存</label>
-                      <input type="number" v-model="product.totalStock" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.totalStock }">
+                      <input type="number" v-model="product.totalStock" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.totalStock }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.totalStock" class="invalid-feedback">{{ errors.activityProducts[index].totalStock }}</div>
                     </div>
                     <div class="col-md-3">
                       <label>秒杀库存</label>
-                      <input type="number" v-model="product.seckillStock" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.seckillStock }">
+                      <input type="number" v-model="product.seckillStock" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.seckillStock }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.seckillStock" class="invalid-feedback">{{ errors.activityProducts[index].seckillStock }}</div>
                     </div>
                   </div>
                   <div class="row mt-3">
                     <div class="col-md-3">
                       <label>每人限购</label>
-                      <input type="number" v-model="product.limitPerUser" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.limitPerUser }">
+                      <input type="number" v-model="product.limitPerUser" required class="form-control" :class="{ 'is-invalid': errors.activityProducts[index]?.limitPerUser }" :disabled="product.__readonly">
                       <div v-if="errors.activityProducts[index]?.limitPerUser" class="invalid-feedback">{{ errors.activityProducts[index].limitPerUser }}</div>
                     </div>
                   </div>
-                  <button type="button" @click="removeProduct(index)" class="btn btn-danger btn-sm mt-2">删除</button>
+                  <button v-if="!product.__readonly" type="button" @click="removeProduct(index)" class="btn btn-danger btn-sm mt-2">删除</button>
                 </div>
                 <button type="button" @click="addProduct" class="btn btn-success btn-sm mt-3">添加商品</button>
               </div>
@@ -145,8 +146,9 @@
 </template>
 
 <script>
-import { getAllActivities, updateActivity, createActivityWithProducts, closeActivity } from '../api/activity'
+import { getAllActivities, updateActivity, createActivityWithProducts, closeActivity, getProductsByActivityId, addProductToActivity } from '../api/activity'
 import { uploadImage } from '../api/file'
+import { createProduct } from '../api/product'
 
 export default {
   data() {
@@ -218,13 +220,37 @@ export default {
     viewActivity(id) {
       this.$router.push(`/admin/activity/${id}`)
     },
-    editActivity(activity) {
+    async editActivity(activity) {
       this.formData = {
         ...activity,
         startTime: this.formatDateTimeLocal(new Date(activity.startTime)),
-        endTime: this.formatDateTimeLocal(new Date(activity.endTime))
+        endTime: this.formatDateTimeLocal(new Date(activity.endTime)),
+        activityProducts: []
       }
       this.showEditForm = true
+
+      // 加载活动已关联商品（只展示，不修改商品基础信息）
+      try {
+        const res = await getProductsByActivityId(activity.id)
+        const list = res.data || []
+        this.formData.activityProducts = list.map(ap => ({
+          __readonly: true,
+          productId: ap.productId,
+          name: `商品#${ap.productId}`,
+          description: '',
+          imageUrl: '',
+          imagePreview: '',
+          imageFile: null,
+          originalPrice: '',
+          totalStock: '',
+          seckillPrice: ap.seckillPrice,
+          seckillStock: ap.seckillStock,
+          limitPerUser: ap.limitPerUser
+        }))
+      } catch (error) {
+        console.error('加载活动商品失败:', error)
+        this.formData.activityProducts = []
+      }
     },
     closeActivity(id) {
       if (confirm('确定要关闭此活动吗？')) {
@@ -249,8 +275,10 @@ export default {
       }
       
       this.loading = true
-      const activityData = {
-        ...this.formData,
+      const baseActivityData = {
+        id: this.formData.id,
+        name: this.formData.name,
+        rule: this.formData.rule,
         startTime: new Date(this.formData.startTime),
         endTime: new Date(this.formData.endTime)
       }
@@ -258,7 +286,49 @@ export default {
       try {
         if (this.showEditForm) {
           // 更新活动
-          await updateActivity(activityData.id, activityData)
+          await updateActivity(baseActivityData.id, baseActivityData)
+
+          // 新增商品：仅处理非只读且没有 productId 的条目
+          const newProducts = (this.formData.activityProducts || []).filter(p => !p.__readonly && !p.productId)
+          for (let i = 0; i < newProducts.length; i++) {
+            const p = newProducts[i]
+
+            // 上传图片（可选）
+            if (p.imageFile && p.imageFile instanceof File) {
+              const imageUrl = await uploadImage(p.imageFile)
+              p.imageUrl = imageUrl
+              p.imageFile = null
+              p.imagePreview = ''
+            }
+
+            // 1) 创建商品（绑定 activityId，用户侧商品列表才能进入秒杀详情）
+            const createdRes = await createProduct({
+              name: p.name,
+              description: p.description,
+              imageUrl: p.imageUrl,
+              activityId: baseActivityData.id,
+              originalPrice: parseFloat(p.originalPrice),
+              seckillPrice: parseFloat(p.seckillPrice),
+              totalStock: parseInt(p.totalStock),
+              seckillStock: parseInt(p.seckillStock),
+              status: 1
+            })
+            const createdProduct = createdRes && createdRes.data
+            const productId = createdProduct && createdProduct.id
+            if (!productId) {
+              throw new Error('创建商品失败：未返回商品ID')
+            }
+
+            // 2) 绑定活动商品（activity_product）
+            await addProductToActivity({
+              activityId: baseActivityData.id,
+              productId,
+              seckillPrice: parseFloat(p.seckillPrice),
+              seckillStock: parseInt(p.seckillStock),
+              limitPerUser: parseInt(p.limitPerUser)
+            })
+          }
+
           alert('活动更新成功')
         } else {
           // 上传所有商品图片
@@ -299,7 +369,7 @@ export default {
           
           // 创建活动（包含商品），转换价格为数字类型
           const requestData = {
-            activity: activityData,
+            activity: baseActivityData,
             seckillProducts: productsWithImages.map(product => ({
               ...product,
               originalPrice: parseFloat(product.originalPrice),
@@ -349,6 +419,8 @@ export default {
     },
     addProduct() {
       this.formData.activityProducts.push({
+        __readonly: false,
+        productId: null,
         name: '',
         description: '',
         imageUrl: '',
@@ -412,12 +484,16 @@ export default {
         }
       }
       
-      // 验证商品信息
+      // 验证商品信息（编辑模式下跳过只读商品，只校验新增商品）
       if (this.formData.activityProducts.length === 0) {
         this.errors.activityProducts.push('至少需要添加一个商品')
         isValid = false
       } else {
         this.formData.activityProducts.forEach((product, index) => {
+          if (product && product.__readonly) {
+            this.errors.activityProducts[index] = {}
+            return
+          }
           const productError = {}
           
           if (!product.name.trim()) {
@@ -525,6 +601,12 @@ export default {
   font-weight: 600;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 68, 0, 0.22);
+}
+
+.hint-text {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 6px 0 10px;
 }
 
 .action-bar {

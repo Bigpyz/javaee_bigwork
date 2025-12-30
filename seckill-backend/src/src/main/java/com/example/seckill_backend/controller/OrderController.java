@@ -21,10 +21,10 @@ public class OrderController {
     private final OrderService orderService;
 
     /**
-     * 
      *
-     * @param request 
-     * @return 
+     *
+     * @param request
+     * @return
      */
     @PostMapping("/seckill")
     public ApiResponse<Order> createSeckillOrder(@Valid @RequestBody SeckillOrderCreateRequest request) {
@@ -79,8 +79,8 @@ public class OrderController {
     /**
      * id
      *
-     * @param id 
-     * @return 
+     * @param id
+     * @return
      */
     @GetMapping("/{id}")
     public ApiResponse<Order> getOrderById(@PathVariable Long id) {
@@ -90,8 +90,8 @@ public class OrderController {
     /**
      * orderNo
      *
-     * @param orderNo 
-     * @return 
+     * @param orderNo
+     * @return
      */
     @GetMapping("/order-no/{orderNo}")
     public ApiResponse<Order> getOrderByOrderNo(@PathVariable String orderNo) {
@@ -101,8 +101,8 @@ public class OrderController {
     /**
      * userId
      *
-     * @param userId 
-     * @return 
+     * @param userId
+     * @return
      */
     @GetMapping("/user/{userId}")
     public ApiResponse<List<Order>> getOrdersByUserId(@PathVariable Long userId) {
@@ -112,8 +112,8 @@ public class OrderController {
     /**
      * status
      *
-     * @param status 
-     * @return 
+     * @param status
+     * @return
      */
     @GetMapping("/status/{status}")
     public ApiResponse<List<Order>> getOrdersByStatus(@PathVariable int status) {
@@ -123,9 +123,9 @@ public class OrderController {
 
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @PostMapping("/process-expired")
     public ApiResponse<Void> processExpiredOrders() {

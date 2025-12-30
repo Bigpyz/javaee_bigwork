@@ -35,7 +35,7 @@
             暂无关联商品
           </div>
           <div v-else class="products-grid">
-            <div v-for="product in activity.activityProducts" :key="product.activityProductId || product.productId || product.id" class="product-card">
+            <div v-for="product in activity.activityProducts" :key="product.activityProductId || product.productId || product.id" class="product-card" @click="goToProduct(product)">
               <div class="product-image">
               <img :src="product.imageDisplayUrl || 'https://via.placeholder.com/200x200?text=暂无图片'" :alt="product.name" @error="handleImageError">
               <div class="product-id">商品ID: {{ product.productId || product.id }}</div>
@@ -155,6 +155,16 @@ export default {
     this.loadActivity()
   },
   methods: {
+    goToProduct(product) {
+      const productId = product && (product.productId != null ? product.productId : product.id)
+      if (!productId) {
+        return
+      }
+      this.$router.push({
+        path: `/product/${productId}`,
+        query: { activityId: this.activity?.id }
+      })
+    },
     loadActivity() {
       const id = this.$route.params.id
       console.log('加载活动详情，ID:', id)
@@ -593,6 +603,7 @@ export default {
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  cursor: pointer;
 }
 
 .product-card:hover {

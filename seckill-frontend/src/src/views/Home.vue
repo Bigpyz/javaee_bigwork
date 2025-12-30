@@ -78,7 +78,7 @@
                     class="product-card"
                   >
                     <div class="product-image">
-                      <img v-if="product.imageUrl" :src="'http://8.130.65.25:28080' + product.imageUrl" :alt="product.productName" class="product-img">
+                      <img v-if="product.imageUrl" :src="getImageUrl(product.imageUrl)" :alt="product.productName" class="product-img">
                       <div v-else class="no-image">暂无图片</div>
                     </div>
                     <div class="product-info">
@@ -112,6 +112,7 @@
 <script>
 import { getActiveActivities, getUpcomingActivities, getProductsByActivityId } from '../api/activity';
 import { getProductById } from '../api/product';
+import apiConfig from '../config/api'
 
 export default {
   name: "Home",
@@ -209,6 +210,16 @@ export default {
     }
   },
   methods: {
+    getImageUrl(imagePath) {
+      if (!imagePath) return '';
+      if (typeof imagePath === 'string' && imagePath.startsWith('http')) {
+        return imagePath;
+      }
+      if (typeof imagePath === 'string' && imagePath.startsWith('/')) {
+        return apiConfig.IMAGE_BASE_URL + imagePath;
+      }
+      return apiConfig.IMAGE_BASE_URL + '/' + imagePath;
+    },
     goToActivityDetail(activityId) {
       this.$router.push(`/activity/${activityId}`)
     },

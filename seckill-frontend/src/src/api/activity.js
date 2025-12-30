@@ -51,6 +51,10 @@ export function createActivityWithProducts(activityData) {
   return http.post(`/api/activities/with-products`, activityData);
 }
 
+export function addProductToActivity(activityProduct) {
+  return http.post(`/api/activities/products`, activityProduct);
+}
+
 export function recordVisit(activityId, userId) {
   return http.post(`/api/activities/${activityId}/record-visit`, null, {
     params: {

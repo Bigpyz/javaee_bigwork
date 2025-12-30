@@ -11,6 +11,10 @@
 
     <div v-else class="grid">
       <div class="card" v-for="p in products" :key="p.id" @click="goDetail(p)">
+        <div class="image">
+          <img v-if="p.imageUrl" :src="getImageUrl(p.imageUrl)" :alt="p.name" class="img">
+          <div v-else class="no-image">暂无图片</div>
+        </div>
         <div class="title">{{ p.name }}</div>
         <div class="desc">{{ p.description || '暂无描述' }}</div>
         <div class="meta">
@@ -30,6 +34,7 @@
 
 <script>
 import { getAllProducts } from '../api/product'
+import apiConfig from '../config/api'
 
 export default {
   name: 'ProductsPage',
@@ -44,6 +49,16 @@ export default {
     this.load()
   },
   methods: {
+    getImageUrl(imagePath) {
+      if (!imagePath) return ''
+      if (typeof imagePath === 'string' && imagePath.startsWith('http')) {
+        return imagePath
+      }
+      if (typeof imagePath === 'string' && imagePath.startsWith('/')) {
+        return apiConfig.IMAGE_BASE_URL + imagePath
+      }
+      return apiConfig.IMAGE_BASE_URL + '/' + imagePath
+    },
     async load() {
       this.loading = true
       this.error = ''
@@ -115,6 +130,29 @@ export default {
   background: rgba(255, 255, 255, 0.92);
   cursor: pointer;
   transition: all .2s ease;
+}
+
+.image {
+  height: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: rgba(17, 24, 39, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .card:hover {
