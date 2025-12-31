@@ -11,10 +11,14 @@ import org.springframework.util.DigestUtils;
 
 import java.util.Date;
 
+/**
+ * 用户服务实现类
+ * 实现用户相关的业务逻辑
+ */
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor  // Lombok注解，自动生成构造函数，注入依赖
 public class UserServiceImpl implements UserService {
-    private final UserMapper userMapper;
+    private final UserMapper userMapper;  // 用户数据访问层依赖
 
     @Override
     public void register(String username, String password) {
@@ -27,16 +31,18 @@ public class UserServiceImpl implements UserService {
         // 对密码进行加密（MD5 方式）
         String encryptedPassword = DigestUtils.md5DigestAsHex(password.getBytes());
 
-        // 创建新用户
+        // 创建新用户对象
         User user = new User();
         user.setUsername(username);
         user.setPassword(encryptedPassword);
 
+        // 插入用户到数据库
         userMapper.insertUser(user);
     }
 
     @Override
     public User login(String username, String password) {
+        // 根据用户名查询用户
         User user = userMapper.getUserByUsername(username);
         if (user == null) {
             throw new BizException(ErrorCode.NOT_FOUND, "用户不存在");
@@ -66,8 +72,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkUserEligibility(Long userId, String rule) {
+        // 如果规则为空，默认允许所有用户参与
         if (rule == null || rule.isEmpty()) {
-            return true; // 无规则限制，默认允许
+            return true;
         }
 
         // 解析规则，这里简单实现，实际项目中可能需要更复杂的规则引擎
@@ -76,17 +83,20 @@ public class UserServiceImpl implements UserService {
             return isNewUser(userId, 7);
         }
 
+        // 其他规则默认允许
         return true;
     }
 
     @Override
     public boolean isNewUser(Long userId, int days) {
+        // 查询用户是否在指定天数内注册
         int count = userMapper.countNewUsersByRegisterTime(userId, days);
         return count > 0;
     }
 
     @Override
     public void recordLoginTime(Long userId) {
+        // 更新用户最后登录时间
         userMapper.updateLastLoginTime(userId, new Date());
     }
 }

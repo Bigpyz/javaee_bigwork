@@ -30,36 +30,46 @@ import { login } from "@/api/user";
 export default {
   data() {
     return {
-      username: "",
-      password: "",
-      loading: false,
-      error: ""
+      username: "",      // 用户名输入框绑定值
+      password: "",      // 密码输入框绑定值
+      loading: false,    // 加载状态，用于控制按钮显示和禁用
+      error: ""          // 错误信息，用于显示登录错误
     };
   },
   methods: {
+    /**
+     * 处理用户登录
+     * 包含前端验证、API调用、错误处理和成功后的页面跳转
+     */
     async handleLogin() {
       // 前端验证用户名和密码是否为空
       if (!this.username.trim()) {
         this.error = "用户名不能为空";
         return;
       }
-      
+
       if (!this.password.trim()) {
         this.error = "密码不能为空";
         return;
       }
-      
+
+      // 设置加载状态和清空错误信息
       this.loading = true;
       this.error = "";
       try {
+        // 调用登录API
         const response = await login(this.username, this.password);
         const userInfo = response.data;
-        // 保存用户信息到localStorage
+
+        // 保存用户信息到localStorage，实现持久化存储
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        // 提示登录成功并跳转到首页
         alert("登录成功！");
         this.$router.push("/");
       } catch (error) {
         console.error("登录失败:", error);
+
         // 根据不同的错误类型显示不同的错误信息
         if (error.response) {
           // 服务器返回的错误
@@ -80,6 +90,7 @@ export default {
           this.error = "登录失败：" + (error.message || "未知错误");
         }
       } finally {
+        // 无论成功或失败，都重置加载状态
         this.loading = false;
       }
     },
@@ -88,6 +99,7 @@ export default {
 </script>
 
 <style scoped>
+/* 页面容器样式 */
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -99,6 +111,7 @@ export default {
     var(--bg);
 }
 
+/* 登录卡片样式 */
 .login-card {
   background-color: rgba(255, 255, 255, 0.85);
   padding: 26px;
@@ -110,6 +123,7 @@ export default {
   max-width: 400px;
 }
 
+/* 标题样式 */
 .login-card h2 {
   margin-top: 0;
   color: var(--text);
@@ -117,6 +131,7 @@ export default {
   margin-bottom: 1.5rem;
 }
 
+/* 表单组样式 */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -137,12 +152,14 @@ export default {
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 
+/* 输入框焦点样式 */
 .form-group input:focus {
   outline: none;
   border-color: rgba(255, 68, 0, 0.55);
   box-shadow: 0 0 0 4px rgba(255, 68, 0, 0.12);
 }
 
+/* 登录按钮样式 */
 .login-btn {
   width: 100%;
   padding: 0.75rem;
@@ -158,6 +175,7 @@ export default {
   transition: transform .15s ease, background-color .15s ease;
 }
 
+/* 按钮悬停和禁用样式 */
 .login-btn:hover:not(:disabled) {
   background-color: var(--primary-700);
   transform: translateY(-1px);
@@ -168,11 +186,13 @@ export default {
   cursor: not-allowed;
 }
 
+/* 错误信息样式 */
 .error {
   color: #e74c3c;
   margin: 0.5rem 0;
 }
 
+/* 注册链接样式 */
 .register-link {
   text-align: center;
   margin-top: 1rem;
