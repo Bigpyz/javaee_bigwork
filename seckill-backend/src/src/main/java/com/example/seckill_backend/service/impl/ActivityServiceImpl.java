@@ -201,7 +201,7 @@ public class ActivityServiceImpl implements ActivityService, ActivityStatsServic
                 logger.info("活动【ID：{}，名称：{}】状态更新：{} → 0（未开始），原因：开始时间{}晚于当前时间{}",
                         activityId, activityName, currentStatus, startTimeStr, nowStr);
             } else if (startTime != null && endTime != null
-                    && startTime.before(now) && endTime.after(now) && currentStatus != 1) {
+                    && startTime.before(now) && endTime.after(now) && currentStatus == 1) {
                 // 活动进行中
                 activity.setStatus(1);
                 activityMapper.update(activity);
