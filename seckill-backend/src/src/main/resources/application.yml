@@ -5,7 +5,7 @@ spring:
   application:
     name: seckill-backend
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:192.168.17.170}:${MYSQL_PORT:3306}/${MYSQL_DB:seckill}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_HOST:8.130.65.25}:${MYSQL_PORT:3306}/${MYSQL_DB:seckill}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:seckill}
     password: ${MYSQL_PASSWORD:Seckill123456!}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -18,7 +18,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:192.168.17.170}
+      host: ${REDIS_HOST:8.130.65.25}
       port: ${REDIS_PORT:6379}
 
   servlet:
